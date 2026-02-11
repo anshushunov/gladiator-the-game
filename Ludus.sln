@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B73DDA1A-9943-472F-8B20-3E347CE6F6EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ludus.Core", "src\Ludus.Core\Ludus.Core.csproj", "{55851EE0-3517-488A-8B53-45F33E9709D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ludus.Tests", "src\Ludus.Tests\Ludus.Tests.csproj", "{30AE043F-5DAB-4A4B-A960-99CBEFC86F58}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{55851EE0-3517-488A-8B53-45F33E9709D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55851EE0-3517-488A-8B53-45F33E9709D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55851EE0-3517-488A-8B53-45F33E9709D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55851EE0-3517-488A-8B53-45F33E9709D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30AE043F-5DAB-4A4B-A960-99CBEFC86F58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30AE043F-5DAB-4A4B-A960-99CBEFC86F58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30AE043F-5DAB-4A4B-A960-99CBEFC86F58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30AE043F-5DAB-4A4B-A960-99CBEFC86F58}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{55851EE0-3517-488A-8B53-45F33E9709D9} = {B73DDA1A-9943-472F-8B20-3E347CE6F6EB}
+		{30AE043F-5DAB-4A4B-A960-99CBEFC86F58} = {B73DDA1A-9943-472F-8B20-3E347CE6F6EB}
+	EndGlobalSection
+EndGlobal
