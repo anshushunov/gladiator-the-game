@@ -1,0 +1,90 @@
+[gd_scene load_steps=2 format=3 uid="uid://main_scene"]
+
+[ext_resource type="Script" path="res://scripts/Main.cs" id="1a2b3c"]
+
+[node name="Main" type="CanvasLayer"]
+script = ExtResource("1a2b3c")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = "3"
+anchors_preset = "11"
+anchor_right = "1.0"
+anchor_bottom = "1.0"
+grow_horizontal = "2"
+grow_vertical = "2"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = "1"
+anchors_preset = "8"
+anchor_left = "0.5"
+anchor_top = "0.5"
+anchor_right = "0.5"
+anchor_bottom = "0.5"
+offset_x = "-320.0"
+offset_y = "-240.0"
+offset_right = "320.0"
+offset_bottom = "240.0"
+grow_horizontal = "2"
+grow_vertical = "2"
+align_center = "true"
+
+[node name="LabelDay" type="Label" parent="Control/VBoxContainer"]
+layout_mode = "0"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_font_sizes/font_size = "24"
+
+[node name="LabelMoney" type="Label" parent="Control/VBoxContainer"]
+layout_mode = "0"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_font_sizes/font_size = "24"
+
+[node name="LabelSeed" type="Label" parent="Control/VBoxContainer"]
+layout_mode = "0"
+theme_override_colors/font_color = "#AAAAAA"
+theme_override_font_sizes/font_size = "16"
+
+[node name="LabelTitle" type="Label" parent="Control/VBoxContainer"]
+layout_mode = "0"
+theme_override_colors/font_color = "#FFD700"
+theme_override_font_sizes/font_size = "32"
+theme_override_font_flags/bold = "true"
+text = "Gladiator Ludus"
+
+[node name="Separator1" type="HSeparator" parent="Control/VBoxContainer"]
+
+[node name="ListGladiators" type="Label" parent="Control/VBoxContainer"]
+layout_mode = "0"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_font_sizes/font_size = "18"
+max_columns = "1"
+autowrap_mode = "1"
+valign = "1"
+
+[node name="Separator2" type="HSeparator" parent="Control/VBoxContainer"]
+
+[node name="ButtonsHBox" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = "0"
+
+[node name="btnNewGame" type="Button" parent="Control/VBoxContainer/ButtonsHBox"]
+layout_mode = "0"
+text = "New Game"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_colors/background_color = "#4CAF50"
+theme_override_colors/hover_color = "#45a049"
+theme_override_font_sizes/font_size = "18"
+
+[node name="btnHireRandom" type="Button" parent="Control/VBoxContainer/ButtonsHBox"]
+layout_mode = "0"
+text = "Hire Random"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_colors/background_color = "#2196F3"
+theme_override_colors/hover_color = "#1976D2"
+theme_override_font_sizes/font_size = "18"
+
+[node name="btnAdvanceDay" type="Button" parent="Control/VBoxContainer/ButtonsHBox"]
+layout_mode = "0"
+text = "Advance Day"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_colors/background_color = "#FF9800"
+theme_override_colors/hover_color = "#F57C00"
+theme_override_font_sizes/font_size = "18"
