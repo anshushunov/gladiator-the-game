@@ -26,15 +26,27 @@ public partial class Main : CanvasLayer
 
     public override void _Ready()
     {
-        _labelDay = GetNode<Label>("/root/Main/VBoxContainer/LabelDay");
-        _labelMoney = GetNode<Label>("/root/Main/VBoxContainer/LabelMoney");
-        _labelSeed = GetNode<Label>("/root/Main/VBoxContainer/LabelSeed");
-        _listGladiators = GetNode<Label>("/root/Main/VBoxContainer/ListGladiators");
-        _fightLog = GetNode<Label>("/root/Main/VBoxContainer/FightLog");
-        _fightStatus = GetNode<Label>("/root/Main/VBoxContainer/FightStatus");
-        _btnSimulateFight = GetNode<Button>("/root/Main/VBoxContainer/btnSimulateFight");
-        _labelFightSelection = GetNode<Label>("/root/Main/VBoxContainer/LabelFightSelection");
+        _labelDay = GetNode<Label>("/root/Main/Control/VBoxContainer/LabelDay");
+        _labelMoney = GetNode<Label>("/root/Main/Control/VBoxContainer/LabelMoney");
+        _labelSeed = GetNode<Label>("/root/Main/Control/VBoxContainer/LabelSeed");
+        _listGladiators = GetNode<Label>("/root/Main/Control/VBoxContainer/ListGladiators");
+        _fightLog = GetNode<Label>("/root/Main/Control/VBoxContainer/FightLog");
+        _fightStatus = GetNode<Label>("/root/Main/Control/VBoxContainer/FightStatus");
+        _btnSimulateFight = GetNode<Button>("/root/Main/Control/VBoxContainer/btnSimulateFight");
+        _labelFightSelection = GetNode<Label>("/root/Main/Control/VBoxContainer/LabelFightSelection");
 
+        // Подключаем кнопки
+        var btnNewGame = GetNode<Button>("/root/Main/Control/VBoxContainer/btnNewGame");
+        var btnHireRandom = GetNode<Button>("/root/Main/Control/VBoxContainer/btnHireRandom");
+        var btnAdvanceDay = GetNode<Button>("/root/Main/Control/VBoxContainer/btnAdvanceDay");
+        var btnSelectFirst = GetNode<Button>("/root/Main/Control/VBoxContainer/btnSelectFirst");
+        var btnSelectSecond = GetNode<Button>("/root/Main/Control/VBoxContainer/btnSelectSecond");
+
+        btnNewGame.Pressed += OnNewGamePressed;
+        btnHireRandom.Pressed += OnHireRandomPressed;
+        btnAdvanceDay.Pressed += OnAdvanceDayPressed;
+        btnSelectFirst.Pressed += OnSelectFirstFighterPressed;
+        btnSelectSecond.Pressed += OnSelectSecondFighterPressed;
         _btnSimulateFight.Pressed += OnSimulateFightPressed;
 
         UpdateUI();
