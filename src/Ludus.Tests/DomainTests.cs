@@ -371,3 +371,149 @@ public class LudusStateTests
         Assert.Equal(expected, actual);
     }
 }
+
+public class EconomyTests
+{
+    [Fact]
+    public void LudusState_NewGame_ShouldInitializeWithCorrectValues()
+    {
+        // act
+        var state = LudusState.NewGame(123);
+
+        // assert
+        Assert.Equal(1, state.Day);
+        Assert.Equal(LudusState.StartingMoney, state.Money);
+        Assert.Equal(123, state.Seed);
+        Assert.Empty(state.Gladiators);
+    }
+
+    [Fact]
+    public void LudusState_NewGame_WithDefaultSeed_ShouldUseDefaultSeed()
+    {
+        // act
+        var state = LudusState.NewGame(LudusState.DefaultSeed);
+
+        // assert
+        Assert.Equal(LudusState.DefaultSeed, state.Seed);
+        Assert.Equal(LudusState.StartingMoney, state.Money);
+    }
+
+    [Fact]
+    public void HireRandomGladiator_ShouldGenerateRandomStats()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+
+        // act
+        var newState = state.HireRandomGladiator();
+
+        // assert
+        Assert.Equal(1, newState.Count);
+        Assert.Equal(LudusState.StartingMoney - LudusState.HireCost, newState.Money);
+        // Seed should be updated (different from original 42)
+        Assert.NotEqual(42, newState.Seed);
+    }
+
+    [Fact]
+    public void HireRandomGladiator_Determinism_WithSameSeed_ShouldGenerateSameGladiator()
+    {
+        // arrange
+        var seed = 12345;
+        var state1 = LudusState.NewGame(seed);
+        var state2 = LudusState.NewGame(seed);
+
+        // act
+        var newState1 = state1.HireRandomGladiator();
+        var newState2 = state2.HireRandomGladiator();
+
+        // assert
+        Assert.Equal(newState1.Gladiators[0].Stats.Strength, newState2.Gladiators[0].Stats.Strength);
+        Assert.Equal(newState1.Gladiators[0].Stats.Agility, newState2.Gladiators[0].Stats.Agility);
+        Assert.Equal(newState1.Gladiators[0].Stats.Stamina, newState2.Gladiators[0].Stats.Stamina);
+        Assert.Equal(newState1.Gladiators[0].Name, newState2.Gladiators[0].Name);
+        Assert.Equal(newState1.Money, newState2.Money);
+        // Seed should be deterministic based on RNG sequence
+        Assert.Equal(newState1.Seed, newState2.Seed);
+    }
+
+    [Fact]
+    public void HireRandomGladiator_ShouldDeductHireCost()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+        int initialMoney = state.Money;
+
+        // act
+        var newState = state.HireRandomGladiator();
+
+        // assert
+        Assert.Equal(initialMoney - LudusState.HireCost, newState.Money);
+    }
+
+    [Fact]
+    public void HireRandomGladiator_Multiple_ShouldDeductMoneyEachTime()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+
+        // act
+        var newState1 = state.HireRandomGladiator();
+        var newState2 = newState1.HireRandomGladiator();
+        var newState3 = newState2.HireRandomGladiator();
+
+        // assert
+        Assert.Equal(3, newState3.Count);
+        Assert.Equal(LudusState.StartingMoney - 3 * LudusState.HireCost, newState3.Money);
+    }
+
+    [Fact]
+    public void AdvanceDay_ShouldIncrementDayAndDeductUpkeep()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+        state = state.HireRandomGladiator();
+        int initialDay = state.Day;
+        int initialMoney = state.Money;
+        int upkeep = LudusState.DailyUpkeepPerGladiator * state.Count;
+
+        // act
+        var newState = state.AdvanceDay();
+
+        // assert
+        Assert.Equal(initialDay + 1, newState.Day);
+        Assert.Equal(initialMoney - upkeep, newState.Money);
+    }
+
+    [Fact]
+    public void AdvanceDay_NoGladiators_ShouldDeductZero()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+        int initialDay = state.Day;
+        int initialMoney = state.Money;
+
+        // act
+        var newState = state.AdvanceDay();
+
+        // assert
+        Assert.Equal(initialDay + 1, newState.Day);
+        Assert.Equal(initialMoney, newState.Money); // No upkeep for 0 gladiators
+    }
+
+    [Fact]
+    public void AdvanceDay_MultipleGladiators_ShouldDeductCorrectly()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+        state = state.HireRandomGladiator();
+        state = state.HireRandomGladiator();
+        int upkeep = LudusState.DailyUpkeepPerGladiator * state.Count;
+
+        // act
+        var newState = state.AdvanceDay();
+
+        // assert
+        Assert.Equal(state.Day + 1, newState.Day);
+        Assert.Equal(state.Money - upkeep, newState.Money);
+    }
+}

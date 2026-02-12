@@ -28,20 +28,16 @@ public partial class Main : CanvasLayer
     /// </summary>
     public void OnNewGamePressed()
     {
-        _state = LudusState.Empty;
+        _state = LudusState.NewGame(LudusState.DefaultSeed);
         UpdateUI();
     }
 
     /// <summary>
-    /// Добавляет случайного гладиатора.
+    /// Нанимает случайного гладиатора с RNG-статами.
     /// </summary>
     public void OnHireRandomPressed()
     {
-        var rng = new SeededRng(_state.Seed);
-        var name = $"Gladiator #{_state.Count + 1}";
-        var stats = Stats.Default;
-        var gladiator = Gladiator.Create(name, stats);
-        _state = _state.AddGladiator(gladiator);
+        _state = _state.HireRandomGladiator();
         UpdateUI();
     }
 
@@ -50,8 +46,7 @@ public partial class Main : CanvasLayer
     /// </summary>
     public void OnAdvanceDayPressed()
     {
-        // Пока просто смена дня — в будущем здесь будет симуляция
-        _state = _state with { Seed = _state.Seed }; // Заглушка для расширения
+        _state = _state.AdvanceDay();
         UpdateUI();
     }
 
@@ -60,8 +55,8 @@ public partial class Main : CanvasLayer
     /// </summary>
     private void UpdateUI()
     {
-        _labelDay?.SetText($"Day: {_state.Seed}");
-        _labelMoney?.SetText("Money: 0");
+        _labelDay?.SetText($"Day: {_state.Day}");
+        _labelMoney?.SetText($"Money: {_state.Money}");
         _labelSeed?.SetText($"Seed: {_state.Seed}");
 
         var gladiatorText = string.Join("\n", _state.Gladiators.Select(g =>
