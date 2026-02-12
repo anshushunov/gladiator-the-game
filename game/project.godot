@@ -1,0 +1,11 @@
+# Godot 4.x .NET project configuration
+[application]
+
+config/name="Gladiator Ludus"
+run/main_scene="res://scenes/Main.tscn"
+config/features=P "4.0"
+config/icon="res://icon.svg"
+
+[editor_profile]
+
+asset_db/path="user://asset_data"
