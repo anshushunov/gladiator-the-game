@@ -20,7 +20,17 @@ public partial record LudusState
     public Guid? ActiveGladiatorId { get; init; }
 
     /// <summary>
-    /// Seed для детерминистического генератора случайных чисел.
+    /// Текущий день симуляции.
+    /// </summary>
+    public int Day { get; init; }
+
+    /// <summary>
+    /// Текущее количество денег.
+    /// </summary>
+    public int Money { get; init; }
+
+    /// <summary>
+    /// Seed для детерignantического генератора случайных чисел.
     /// Хранится как int для сериализуемости и воспроизводимости.
     /// </summary>
     public int Seed { get; init; }
@@ -30,10 +40,25 @@ public partial record LudusState
     /// </summary>
     public const int DefaultSeed = 42;
 
+    /// <summary>
+    /// Стартовое количество денег.
+    /// </summary>
+    public const int StartingMoney = 500;
+
+    /// <summary>
+    /// Стоимость найма гладиатора.
+    /// </summary>
+    public const int HireCost = 100;
+
+    /// <summary>
+    /// Ежедневное содержание одного гладиатора.
+    /// </summary>
+    public const int DailyUpkeepPerGladiator = 5;
+
     private const int MinGladiators = 0;
     private const int MaxGladiators = 100;
 
-    private LudusState(IReadOnlyList<Gladiator> gladiators, Guid? activeGladiatorId, int seed)
+    private LudusState(IReadOnlyList<Gladiator> gladiators, Guid? activeGladiatorId, int day, int money, int seed)
     {
         if (gladiators.Count < MinGladiators || gladiators.Count > MaxGladiators)
             throw new ValidationException(
@@ -43,15 +68,31 @@ public partial record LudusState
             !gladiators.Any(g => g.Id == activeGladiatorId.Value))
             throw new ValidationException("ActiveGladiatorId должен соответствовать существующему гладиатору");
 
+        if (day < 1)
+            throw new ValidationException("Day должен быть >= 1");
+
+        if (money < 0)
+            throw new ValidationException("Money не может быть отрицательным");
+
         Gladiators = gladiators;
         ActiveGladiatorId = activeGladiatorId;
+        Day = day;
+        Money = money;
         Seed = seed;
     }
 
     /// <summary>
     /// Создаёт пустое состояние симуляции.
     /// </summary>
-    public static LudusState Empty => new(Array.Empty<Gladiator>(), null, DefaultSeed);
+    public static LudusState Empty => new(Array.Empty<Gladiator>(), null, 1, StartingMoney, DefaultSeed);
+
+    /// <summary>
+    /// Создаёт новую игру с заданным seed.
+    /// </summary>
+    public static LudusState NewGame(int seed)
+    {
+        return new LudusState(Array.Empty<Gladiator>(), null, 1, StartingMoney, seed);
+    }
 
     /// <summary>
     /// Добавляет гладиатора в симуляцию.
@@ -95,6 +136,49 @@ public partial record LudusState
             throw new ValidationException($"Гладиатор с ID {gladiatorId} не найден в симуляции");
 
         return this with { ActiveGladiatorId = gladiatorId };
+    }
+
+    /// <summary>
+    /// Нанимает случайного гладиатора с использованием RNG.
+    /// Генерирует случайные статы и имя, списывает HireCost и обновляет Seed.
+    /// </summary>
+    public LudusState HireRandomGladiator()
+    {
+        // Создаём RNG на основе текущего Seed
+        var rng = CreateRng();
+
+        // Генерируем статы в диапазоне [1, 10]
+        int strength = rng.Next(1, 10);
+        int agility = rng.Next(1, 10);
+        int stamina = rng.Next(1, 10);
+        var stats = new Stats(strength, agility, stamina);
+
+        // Генерируем имя из префикса + номер
+        string[] prefixes = ["Brutus", "Crixus", "Spartacus", "Oenomaus", "Roma", "Spiculus", "Varro"];
+        string prefix = prefixes[rng.Next(prefixes.Length)];
+        string name = $"{prefix} #{Count + 1}";
+
+        // Создаём гладиатора
+        var gladiator = Gladiator.Create(name, stats);
+
+        // Обновляем состояние: добавляем гладиатора и списываем деньги
+        var newState = AddGladiator(gladiator) with { Money = Money - HireCost };
+
+        // Обновляем Seed детерминированно: используем следующее значение из RNG
+        int newSeed = rng.Next(int.MaxValue);
+        return newState with { Seed = newSeed };
+    }
+
+    /// <summary>
+    /// Переходит к следующему дню: увеличивает Day и списывает ежедневное содержание.
+    /// </summary>
+    public LudusState AdvanceDay()
+    {
+        // Списываем содержание: DailyUpkeepPerGladiator * Gladiators.Count
+        int upkeep = DailyUpkeepPerGladiator * Gladiators.Count;
+        int newMoney = Money - upkeep;
+
+        return this with { Day = Day + 1, Money = newMoney };
     }
 
     /// <summary>
