@@ -7,7 +7,7 @@ namespace Ludus.Core;
 /// <summary>
 /// Состояние симуляции Ludus: коллекция гладиаторов и ID текущего активного.
 /// </summary>
-public record LudusState
+public partial record LudusState
 {
     /// <summary>
     /// Коллекция всех гладиаторов в симуляции.
@@ -19,10 +19,21 @@ public record LudusState
     /// </summary>
     public Guid? ActiveGladiatorId { get; init; }
 
+    /// <summary>
+    /// Seed для детерминистического генератора случайных чисел.
+    /// Хранится как int для сериализуемости и воспроизводимости.
+    /// </summary>
+    public int Seed { get; init; }
+
+    /// <summary>
+    /// Константа для значения seed по умолчанию.
+    /// </summary>
+    public const int DefaultSeed = 42;
+
     private const int MinGladiators = 0;
     private const int MaxGladiators = 100;
 
-    private LudusState(IReadOnlyList<Gladiator> gladiators, Guid? activeGladiatorId)
+    private LudusState(IReadOnlyList<Gladiator> gladiators, Guid? activeGladiatorId, int seed)
     {
         if (gladiators.Count < MinGladiators || gladiators.Count > MaxGladiators)
             throw new ValidationException(
@@ -34,12 +45,13 @@ public record LudusState
 
         Gladiators = gladiators;
         ActiveGladiatorId = activeGladiatorId;
+        Seed = seed;
     }
 
     /// <summary>
     /// Создаёт пустое состояние симуляции.
     /// </summary>
-    public static LudusState Empty => new(Array.Empty<Gladiator>(), null);
+    public static LudusState Empty => new(Array.Empty<Gladiator>(), null, DefaultSeed);
 
     /// <summary>
     /// Добавляет гладиатора в симуляцию.
@@ -83,6 +95,15 @@ public record LudusState
             throw new ValidationException($"Гладиатор с ID {gladiatorId} не найден в симуляции");
 
         return this with { ActiveGladiatorId = gladiatorId };
+    }
+
+    /// <summary>
+    /// Создаёт новый RNG на основе stored seed.
+    /// Каждый вызов возвращает новый экземпляр RNG с тем же seed.
+    /// </summary>
+    public SeededRng CreateRng()
+    {
+        return new SeededRng(Seed);
     }
 
     /// <summary>
