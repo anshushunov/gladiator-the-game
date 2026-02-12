@@ -372,6 +372,144 @@ public class LudusStateTests
     }
 }
 
+public class FightEngineTests
+{
+    [Fact]
+    public void SimulateFight_Determinism_SameSeed_ShouldProduceSameResult()
+    {
+        // arrange
+        var seed = 42;
+        var g1 = Gladiator.Create("Strong", new Stats(8, 5, 6));
+        var g2 = Gladiator.Create("Weak", new Stats(5, 5, 5));
+
+        // act
+        var result1 = FightEngine.SimulateFight(g1, g2, seed);
+        var result2 = FightEngine.SimulateFight(g1, g2, seed);
+
+        // assert
+        Assert.Equal(result1.Winner.Name, result2.Winner.Name);
+        Assert.Equal(result1.Loser.Name, result2.Loser.Name);
+        Assert.Equal(result1.Log.Events.Count, result2.Log.Events.Count);
+        for (int i = 0; i < result1.Log.Events.Count; i++)
+        {
+            var e1 = result1.Log.Events[i];
+            var e2 = result2.Log.Events[i];
+            Assert.Equal(e1.Round, e2.Round);
+            Assert.Equal(e1.Type, e2.Type);
+            Assert.Equal(e1.Value, e2.Value);
+            Assert.Equal(e1.AttackerName, e2.AttackerName);
+        }
+    }
+
+    [Fact]
+    public void SimulateFight_StrongerShouldWin()
+    {
+        // arrange
+        var seed = 123;
+        var strong = Gladiator.Create("Strong", new Stats(9, 5, 9));
+        var weak = Gladiator.Create("Weak", new Stats(3, 5, 3));
+
+        // act
+        var result = FightEngine.SimulateFight(strong, weak, seed);
+
+        // assert
+        Assert.Equal("Strong", result.Winner.Name);
+        Assert.Equal("Weak", result.Loser.Name);
+        Assert.False(result.Loser.IsAlive);
+        Assert.True(result.Winner.IsAlive);
+    }
+
+    [Fact]
+    public void SimulateFight_BothEqualStrength_TakesRandomWinner()
+    {
+        // arrange
+        var strong = Gladiator.Create("G1", new Stats(7, 7, 7));
+        var weak = Gladiator.Create("G2", new Stats(7, 7, 7));
+
+        // act
+        var result1 = FightEngine.SimulateFight(strong, weak, 42);
+        var result2 = FightEngine.SimulateFight(strong, weak, 42);
+
+        // assert — с одним seed всегда один результат (детерминизм)
+        Assert.Equal(result1.Winner.Name, result2.Winner.Name);
+    }
+
+    [Fact]
+    public void SimulateFight_LogContainsEvents()
+    {
+        // arrange
+        var g1 = Gladiator.Create("G1", new Stats(8, 5, 6));
+        var g2 = Gladiator.Create("G2", new Stats(5, 5, 5));
+
+        // act
+        var result = FightEngine.SimulateFight(g1, g2, 42);
+
+        // assert
+        Assert.True(result.Log.Events.Count > 0);
+        Assert.Contains(result.Log.Events, e => e.Type == FightLog.EventType.Hit);
+        Assert.Contains(result.Log.Events, e => e.Type == FightLog.EventType.FightEnd);
+    }
+
+    [Fact]
+    public void SimulateFight_LogToString_ShouldIncludeFightDetails()
+    {
+        // arrange
+        var g1 = Gladiator.Create("G1", new Stats(8, 5, 6));
+        var g2 = Gladiator.Create("G2", new Stats(5, 5, 5));
+
+        // act
+        var result = FightEngine.SimulateFight(g1, g2, 42);
+
+        // assert
+        string logText = result.Log.ToString();
+        Assert.Contains("Fight Log", logText);
+        Assert.Contains("G1", logText);
+        Assert.Contains("G2", logText);
+    }
+
+    [Fact]
+    public void SimulateFight_FirstAttackerAdvantage()
+    {
+        // arrange — разница в силе значительная
+        var strong = Gladiator.Create("Strong", new Stats(10, 5, 10));
+        var weak = Gladiator.Create("Weak", new Stats(3, 3, 3));
+
+        // act
+        var result = FightEngine.SimulateFight(strong, weak, 42);
+
+        // assert
+        Assert.Equal("Strong", result.Winner.Name);
+        Assert.Equal("Weak", result.Loser.Name);
+    }
+
+    [Fact]
+    public void SimulateFight_WithAgility_DefenderMightMiss()
+    {
+        // arrange — защитник ловкий, атакующий слабый
+        var weakAttacker = Gladiator.Create("WeakAtk", new Stats(3, 8, 6));
+            var strongDefender = Gladiator.Create("StrongDef", new Stats(5, 10, 10));
+
+        // act
+        var result = FightEngine.SimulateFight(weakAttacker, strongDefender, 123);
+
+        // assert — с высокой ловкостью защитника, есть шанс на промах
+        Assert.True(result.Winner.IsAlive);
+        Assert.False(result.Loser.IsAlive);
+    }
+
+    [Fact]
+    public void SimulateFight_ThrowsOnDeadGladiator()
+    {
+        // arrange
+        var alive = Gladiator.Create("Alive", new Stats(5, 5, 5));
+        var dead = Gladiator.Create("Dead", new Stats(5, 5, 5)).TakeDamage(100);
+
+        // assert
+        var ex = Assert.Throws<ArgumentException>(() => FightEngine.SimulateFight(alive, dead, 42));
+        Assert.Contains("жив", ex.Message.ToLower());
+    }
+}
+
 public class EconomyTests
 {
     [Fact]
