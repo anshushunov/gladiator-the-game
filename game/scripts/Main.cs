@@ -5,6 +5,7 @@ namespace Ludus.Game;
 
 /// <summary>
 /// Главный скрипт сцены. Управляет UI и интеграцией с Ludus.Core.
+/// Предоставляет выбор двух гладиаторов и запуск симуляции боя.
 /// </summary>
 public partial class Main : CanvasLayer
 {
@@ -13,6 +14,15 @@ public partial class Main : CanvasLayer
     private Label? _labelMoney;
     private Label? _labelSeed;
     private Label? _listGladiators;
+    
+    // UI для боя
+    private Label? _fightLog;
+    private Label? _fightStatus;
+    private Button? _btnSimulateFight;
+    private Label? _labelFightSelection;
+
+    private int? _firstFighterIndex;
+    private int? _secondFighterIndex;
 
     public override void _Ready()
     {
@@ -20,6 +30,13 @@ public partial class Main : CanvasLayer
         _labelMoney = GetNode<Label>("/root/Main/VBoxContainer/LabelMoney");
         _labelSeed = GetNode<Label>("/root/Main/VBoxContainer/LabelSeed");
         _listGladiators = GetNode<Label>("/root/Main/VBoxContainer/ListGladiators");
+        _fightLog = GetNode<Label>("/root/Main/VBoxContainer/FightLog");
+        _fightStatus = GetNode<Label>("/root/Main/VBoxContainer/FightStatus");
+        _btnSimulateFight = GetNode<Button>("/root/Main/VBoxContainer/btnSimulateFight");
+        _labelFightSelection = GetNode<Label>("/root/Main/VBoxContainer/LabelFightSelection");
+
+        _btnSimulateFight.Pressed += OnSimulateFightPressed;
+
         UpdateUI();
     }
 
@@ -29,6 +46,8 @@ public partial class Main : CanvasLayer
     public void OnNewGamePressed()
     {
         _state = LudusState.NewGame(LudusState.DefaultSeed);
+        _firstFighterIndex = null;
+        _secondFighterIndex = null;
         UpdateUI();
     }
 
@@ -51,6 +70,71 @@ public partial class Main : CanvasLayer
     }
 
     /// <summary>
+    /// Выбирает первого гладиатора для боя по индексу в списке.
+    /// </summary>
+    public void OnSelectFirstFighterPressed()
+    {
+        var alive = _state.AliveGladiators;
+        if (alive.Count >= 1)
+        {
+            _firstFighterIndex = 0;
+            _secondFighterIndex = null;
+        }
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// Выбирает второго гладиатора для боя по индексу в списке.
+    /// </summary>
+    public void OnSelectSecondFighterPressed()
+    {
+        var alive = _state.AliveGladiators;
+        if (alive.Count >= 2)
+        {
+            _secondFighterIndex = 1;
+        }
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// Запускает симуляцию боя между двумя выбранными гладиаторами.
+    /// </summary>
+    public void OnSimulateFightPressed()
+    {
+        if (!_firstFighterIndex.HasValue || !_secondFighterIndex.HasValue)
+        {
+            _fightStatus?.SetText("Ошибка: выберите двух гладиаторов");
+            return;
+        }
+
+        var alive = _state.AliveGladiators;
+        if (_firstFighterIndex.Value >= alive.Count || _secondFighterIndex.Value >= alive.Count)
+        {
+            _fightStatus?.SetText("Ошибка: неверные индексы гладиаторов");
+            return;
+        }
+
+        var g1 = alive[_firstFighterIndex.Value];
+        var g2 = alive[_secondFighterIndex.Value];
+
+        if (g1.Id == g2.Id)
+        {
+            _fightStatus?.SetText("Ошибка: гладиаторы не могут быть одинаковыми");
+            return;
+        }
+
+        // Запускаем симуляцию
+        var result = FightEngine.SimulateFight(g1, g2, 42);
+
+        // Отображаем лог
+        var logText = $"=== Fight Log ===\n{result.Log}";
+        _fightLog?.SetText(logText);
+        
+        // Отображаем победителя
+        _fightStatus?.SetText($"Победитель: {result.Winner.Name} (HP: {result.Winner.Health}/{result.Winner.MaxHealth})");
+    }
+
+    /// <summary>
     /// Обновляет UI на основе текущего состояния.
     /// </summary>
     private void UpdateUI()
@@ -59,10 +143,22 @@ public partial class Main : CanvasLayer
         _labelMoney?.SetText($"Money: {_state.Money}");
         _labelSeed?.SetText($"Seed: {_state.Seed}");
 
-        var gladiatorText = string.Join("\n", _state.Gladiators.Select(g =>
-            $"{g.Name} | HP: {g.Health}/{g.MaxHealth} | Str: {g.Stats.Strength}, Agi: {g.Stats.Agility}, Sta: {g.Stats.Stamina}"
+        var gladiatorText = string.Join("\n", _state.Gladiators.Select((g, i) =>
+            $"{i}: {g.Name} | HP: {g.Health}/{g.MaxHealth} | Str: {g.Stats.Strength}, Agi: {g.Stats.Agility}, Sta: {g.Stats.Stamina}"
         ));
 
         _listGladiators?.SetText(gladiatorText);
+
+        // Отображаем статус выбора гладиаторов для боя
+        string firstText = _firstFighterIndex.HasValue ? $"First: {_state.AliveGladiators[_firstFighterIndex.Value].Name}" : "First: не выбран";
+        string secondText = _secondFighterIndex.HasValue ? $"Second: {_state.AliveGladiators[_secondFighterIndex.Value].Name}" : "Second: не выбран";
+        _labelFightSelection?.SetText($"Выбор: [{firstText}] vs [{secondText}]");
+
+        // Проверяем возможность выбора второго
+        var secondBtn = GetNode<Button>("/root/Main/VBoxContainer/btnSelectSecond");
+        if (secondBtn != null)
+        {
+            secondBtn.Disabled = _state.AliveGladiators.Count < 2;
+        }
     }
 }
