@@ -182,6 +182,43 @@ public partial record LudusState
     }
 
     /// <summary>
+    /// Проводит бой между двумя живыми гладиаторами, применяет результат к состоянию
+    /// и детерминированно продвигает seed.
+    /// </summary>
+    public (LudusState State, FightResult Result) ResolveFight(Guid firstGladiatorId, Guid secondGladiatorId)
+    {
+        if (firstGladiatorId == secondGladiatorId)
+            throw new ValidationException("Гладиаторы для боя должны быть разными");
+
+        var first = GetGladiator(firstGladiatorId);
+        var second = GetGladiator(secondGladiatorId);
+
+        if (!first.IsAlive || !second.IsAlive)
+            throw new ValidationException("В бою могут участвовать только живые гладиаторы");
+
+        var rng = CreateRng();
+        var result = FightEngine.SimulateFight(first, second, rng);
+
+        var updatedGladiators = Gladiators
+            .Select(g =>
+            {
+                if (g.Id == result.Winner.Id) return result.Winner;
+                if (g.Id == result.Loser.Id) return result.Loser;
+                return g;
+            })
+            .ToArray();
+
+        int newSeed = rng.Next(int.MaxValue);
+        var updatedState = this with
+        {
+            Gladiators = updatedGladiators,
+            Seed = newSeed
+        };
+
+        return (updatedState, result);
+    }
+
+    /// <summary>
     /// Создаёт новый RNG на основе stored seed.
     /// Каждый вызов возвращает новый экземпляр RNG с тем же seed.
     /// </summary>

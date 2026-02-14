@@ -31,6 +31,11 @@
 4) Получить деньги/травмы/прогресс
 5) Повторить
 
+### Поведение боя в UI
+- После симуляции боя результат применяется к `LudusState`.
+- Победитель сохраняет остаток HP, проигравший остаётся в ростере с `HP = 0`.
+- Игра остаётся в основном экране: можно сразу продолжать найм, дни и следующие бои.
+
 ## Name Generator (Issue #14)
 - Core API:
   - `INameGenerator.GenerateNext()` -> returns next unique `prefix + cognomen` name, throws `NameGenerationException` when pool is exhausted.

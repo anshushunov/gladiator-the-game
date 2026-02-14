@@ -653,4 +653,89 @@ public class EconomyTests
         Assert.Equal(state.Day + 1, newState.Day);
         Assert.Equal(state.Money - upkeep, newState.Money);
     }
+
+    [Fact]
+    public void ResolveFight_ShouldApplyWinnerAndLoserState()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+        var g1 = Gladiator.Create("Alpha", new Stats(8, 6, 8));
+        var g2 = Gladiator.Create("Beta", new Stats(6, 5, 6));
+        state = state.AddGladiator(g1);
+        state = state.AddGladiator(g2);
+
+        // act
+        var (updatedState, result) = state.ResolveFight(g1.Id, g2.Id);
+
+        // assert
+        Assert.Equal(2, updatedState.Count);
+        Assert.Single(updatedState.AliveGladiators);
+        Assert.Contains(updatedState.Gladiators, g => g.Id == result.Winner.Id && g.IsAlive);
+        Assert.Contains(updatedState.Gladiators, g => g.Id == result.Loser.Id && !g.IsAlive && g.Health == 0);
+    }
+
+    [Fact]
+    public void ResolveFight_Determinism_WithSameSeed_ShouldProduceSameOutcome()
+    {
+        // arrange
+        var state1 = LudusState.NewGame(2026);
+        var state2 = LudusState.NewGame(2026);
+        var a1 = Gladiator.Create("A", new Stats(8, 6, 8));
+        var b1 = Gladiator.Create("B", new Stats(7, 6, 7));
+        var a2 = new Gladiator(a1.Id, a1.Name, a1.Stats, a1.Health, a1.MaxHealth);
+        var b2 = new Gladiator(b1.Id, b1.Name, b1.Stats, b1.Health, b1.MaxHealth);
+        state1 = state1.AddGladiator(a1).AddGladiator(b1);
+        state2 = state2.AddGladiator(a2).AddGladiator(b2);
+
+        // act
+        var (updated1, result1) = state1.ResolveFight(a1.Id, b1.Id);
+        var (updated2, result2) = state2.ResolveFight(a2.Id, b2.Id);
+
+        // assert
+        Assert.Equal(result1.Winner.Name, result2.Winner.Name);
+        Assert.Equal(result1.Loser.Name, result2.Loser.Name);
+        Assert.Equal(result1.Log.ToString(), result2.Log.ToString());
+        Assert.Equal(updated1.Seed, updated2.Seed);
+    }
+
+    [Fact]
+    public void ResolveFight_ShouldAdvanceSeed()
+    {
+        // arrange
+        var state = LudusState.NewGame(1234);
+        var g1 = Gladiator.Create("A", new Stats(8, 6, 8));
+        var g2 = Gladiator.Create("B", new Stats(7, 6, 7));
+        state = state.AddGladiator(g1).AddGladiator(g2);
+
+        // act
+        var (updatedState, _) = state.ResolveFight(g1.Id, g2.Id);
+
+        // assert
+        Assert.NotEqual(state.Seed, updatedState.Seed);
+    }
+
+    [Fact]
+    public void ResolveFight_WithSameGladiatorId_ShouldThrow()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+        var g = Gladiator.Create("Solo", new Stats(8, 6, 8));
+        state = state.AddGladiator(g);
+
+        // assert
+        Assert.Throws<ValidationException>(() => state.ResolveFight(g.Id, g.Id));
+    }
+
+    [Fact]
+    public void ResolveFight_WithDeadGladiator_ShouldThrow()
+    {
+        // arrange
+        var state = LudusState.NewGame(42);
+        var alive = Gladiator.Create("Alive", new Stats(8, 6, 8));
+        var dead = Gladiator.Create("Dead", new Stats(6, 5, 6)).TakeDamage(1000);
+        state = state.AddGladiator(alive).AddGladiator(dead);
+
+        // assert
+        Assert.Throws<ValidationException>(() => state.ResolveFight(alive.Id, dead.Id));
+    }
 }
