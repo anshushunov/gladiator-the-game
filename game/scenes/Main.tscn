@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://main_scene"]
+﻿[gd_scene load_steps=13 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/Main.cs" id="1a2b3c"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/arena_bg_01.svg" id="2_bg"]
@@ -32,14 +32,22 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="BgTint" type="ColorRect" parent="Control"]
+[node name="BgBase" type="ColorRect" parent="Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.1, 0.08, 0.06, 0.72)
+color = Color(0.09, 0.08, 0.06, 0.85)
+
+[node name="BgGlow" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 0.36
+grow_horizontal = 2
+color = Color(0.42, 0.23, 0.13, 0.25)
 
 [node name="MarginContainer" type="MarginContainer" parent="Control"]
 layout_mode = 1
@@ -55,87 +63,117 @@ theme_override_constants/margin_bottom = 20
 
 [node name="RootVBox" type="VBoxContainer" parent="Control/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 14
 
 [node name="LabelTitle" type="Label" parent="Control/MarginContainer/RootVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.85, 0.67, 1)
-theme_override_font_sizes/font_size = 30
-text = "Gladiator Ludus"
+theme_override_colors/font_color = Color(0.95, 0.83, 0.62, 1)
+theme_override_font_sizes/font_size = 34
+text = "Ludus Manager"
 
-[node name="StatsHBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox"]
+[node name="TopStats" type="HBoxContainer" parent="Control/MarginContainer/RootVBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="DayBlock" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/StatsHBox"]
+[node name="DayPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/TopStats"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="DayMargin" type="MarginContainer" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="DayBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin"]
+layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="IconDay" type="TextureRect" parent="Control/MarginContainer/RootVBox/StatsHBox/DayBlock"]
+[node name="DayIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin/DayBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(20, 20)
 texture = ExtResource("3_str")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LabelDay" type="Label" parent="Control/MarginContainer/RootVBox/StatsHBox/DayBlock"]
+[node name="LabelDay" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin/DayBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.95, 0.92, 1)
+theme_override_colors/font_color = Color(0.97, 0.97, 0.95, 1)
 theme_override_font_sizes/font_size = 20
-text = "Day: 1"
+text = "Day 1"
 
-[node name="MoneyBlock" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/StatsHBox"]
+[node name="MoneyPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/TopStats"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="MoneyMargin" type="MarginContainer" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="MoneyBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin"]
+layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="IconMoney" type="TextureRect" parent="Control/MarginContainer/RootVBox/StatsHBox/MoneyBlock"]
+[node name="MoneyIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/MoneyBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(20, 20)
 texture = ExtResource("4_agi")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LabelMoney" type="Label" parent="Control/MarginContainer/RootVBox/StatsHBox/MoneyBlock"]
+[node name="LabelMoney" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/MoneyBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.95, 0.92, 1)
+theme_override_colors/font_color = Color(0.91, 0.92, 0.78, 1)
 theme_override_font_sizes/font_size = 20
-text = "Money: 100"
+text = "Money 500"
 
-[node name="SeedBlock" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/StatsHBox"]
+[node name="SeedPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/TopStats"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="SeedMargin" type="MarginContainer" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="SeedBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin"]
+layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="IconSeed" type="TextureRect" parent="Control/MarginContainer/RootVBox/StatsHBox/SeedBlock"]
+[node name="SeedIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/SeedBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(20, 20)
 texture = ExtResource("5_sta")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LabelSeed" type="Label" parent="Control/MarginContainer/RootVBox/StatsHBox/SeedBlock"]
+[node name="LabelSeed" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/SeedBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.86, 0.83, 1)
-theme_override_font_sizes/font_size = 16
-text = "Seed: 42"
+theme_override_colors/font_color = Color(0.75, 0.8, 0.75, 1)
+theme_override_font_sizes/font_size = 18
+text = "Seed 42"
 
-[node name="ActionsHBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox"]
+[node name="ActionRow" type="HBoxContainer" parent="Control/MarginContainer/RootVBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="btnNewGame" type="Button" parent="Control/MarginContainer/RootVBox/ActionsHBox"]
+[node name="btnNewGame" type="Button" parent="Control/MarginContainer/RootVBox/ActionRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "New Game"
 
-[node name="btnHireRandom" type="Button" parent="Control/MarginContainer/RootVBox/ActionsHBox"]
+[node name="btnHireRandom" type="Button" parent="Control/MarginContainer/RootVBox/ActionRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Hire Random"
 
-[node name="btnAdvanceDay" type="Button" parent="Control/MarginContainer/RootVBox/ActionsHBox"]
+[node name="btnAdvanceDay" type="Button" parent="Control/MarginContainer/RootVBox/ActionRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Advance Day"
@@ -152,123 +190,125 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="RosterMargin" type="MarginContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
-
-[node name="RosterVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin"]
+[node name="RosterVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LabelRosterTitle" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+[node name="LabelRosterTitle" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.84, 0.66, 1)
+theme_override_colors/font_color = Color(0.95, 0.83, 0.62, 1)
 theme_override_font_sizes/font_size = 22
 text = "Roster"
 
-[node name="CardDecor" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+[node name="CardDecor" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 40)
 texture = ExtResource("9_card")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="StatusLegend" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+[node name="StatusLegend" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
-[node name="FitIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+[node name="FitIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
 layout_mode = 2
-custom_minimum_size = Vector2(16, 16)
+custom_minimum_size = Vector2(14, 14)
 texture = ExtResource("6_fit")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="FitLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+[node name="FitLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
 layout_mode = 2
 text = "Fit"
 
-[node name="InjuredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+[node name="InjuredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
 layout_mode = 2
-custom_minimum_size = Vector2(16, 16)
+custom_minimum_size = Vector2(14, 14)
 texture = ExtResource("7_inj")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="InjuredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+[node name="InjuredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
 layout_mode = 2
 text = "Injured"
 
-[node name="TiredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+[node name="TiredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
 layout_mode = 2
-custom_minimum_size = Vector2(16, 16)
+custom_minimum_size = Vector2(14, 14)
 texture = ExtResource("8_tired")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="TiredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+[node name="TiredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
 layout_mode = 2
 text = "Tired"
 
-[node name="ListGladiators" type="ItemList" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+[node name="ListGladiators" type="ItemList" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(420, 320)
+custom_minimum_size = Vector2(420, 300)
 
 [node name="FightPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/MainGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="FightMargin" type="MarginContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
-
-[node name="FightVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin"]
+[node name="FightVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="LabelFightTitle" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+[node name="LabelFightTitle" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.95, 0.84, 0.66, 1)
+theme_override_colors/font_color = Color(0.95, 0.83, 0.62, 1)
 theme_override_font_sizes/font_size = 22
 text = "Fight Setup"
 
-[node name="FightSelectionHBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+[node name="FighterSelects" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="btnSelectFirst" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox/FightSelectionHBox"]
+[node name="FirstPicker" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Select First"
+theme_override_constants/separation = 4
 
-[node name="btnSelectSecond" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox/FightSelectionHBox"]
+[node name="LabelFirst" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/FirstPicker"]
+layout_mode = 2
+text = "First fighter"
+
+[node name="FirstFighterSelect" type="OptionButton" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/FirstPicker"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Select Second"
 
-[node name="LabelFightSelection" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+[node name="SecondPicker" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.87, 0.95, 1)
-text = "Selection: [First: not selected] vs [Second: not selected]"
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
 
-[node name="btnSimulateFight" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+[node name="LabelSecond" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/SecondPicker"]
+layout_mode = 2
+text = "Second fighter"
+
+[node name="SecondFighterSelect" type="OptionButton" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/SecondPicker"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SelectionStatus" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83, 0.89, 0.95, 1)
+text = "Selection: not selected vs not selected"
+
+[node name="btnSimulateFight" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox"]
 layout_mode = 2
 text = "Simulate Fight"
 
-[node name="FightStatus" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+[node name="FightStatus" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.86, 0.95, 0.78, 1)
+theme_override_colors/font_color = Color(0.88, 0.96, 0.79, 1)
 text = ""
 
-[node name="FightLog" type="RichTextLabel" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+[node name="FightLog" type="RichTextLabel" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 custom_minimum_size = Vector2(420, 220)

@@ -38,7 +38,7 @@
 
 ## Post-MVP Roadmap
 
-### Issue-0: Post-MVP roadmap in README
+### [x] Issue-0: Post-MVP roadmap in README
 - Goal:
   - фиксируем post-MVP направление, декомпозицию задач и критерии проверки в документации.
 - Scope:
@@ -48,7 +48,7 @@
   - у каждого следующего issue есть цель и "как проверить";
   - `dotnet test` проходит без регрессий.
 
-### Issue-A: UI Foundation v2
+### [ ] Issue-A: UI Foundation v2
 - Goal:
   - сделать более живой и читаемый основной экран (HUD, ростер, бой, события).
 - Changes:
@@ -58,7 +58,7 @@
   2) текущие сценарии MVP (new game, hire, advance day, fight) работают как раньше;
   3) нет регрессии в отображении статуса боя и списка гладиаторов.
 
-### Issue-B: Asset Pack v1 Integration
+### [ ] Issue-B: Asset Pack v1 Integration
 - Goal:
   - добавить первые ассеты для атмосферы и читаемости.
 - Changes:
@@ -68,7 +68,7 @@
   2) нет битых путей/ресурсов в Godot;
   3) визуал не ломает существующие UI-сценарии.
 
-### Issue-C: Training System v1 (Core-first)
+### [ ] Issue-C: Training System v1 (Core-first)
 - Goal:
   - добавить назначение тренировок и применение эффектов на дневном тике.
 - Changes:
@@ -78,7 +78,7 @@
   2) тесты на ограничения, прирост статов и инварианты проходят;
   3) UI только отображает состояние, логика живет в Core.
 
-### Issue-D: Injuries & Recovery v1
+### [ ] Issue-D: Injuries & Recovery v1
 - Goal:
   - добавить травмы после боя и восстановление по дням.
 - Changes:
@@ -88,7 +88,7 @@
   2) боец в восстановлении корректно ограничен;
   3) тесты проверяют граничные случаи и снятие ограничений.
 
-### Issue-E: Morale/Fatigue v1
+### [ ] Issue-E: Morale/Fatigue v1
 - Goal:
   - добавить мораль и усталость как факторы эффективности.
 - Changes:
@@ -98,7 +98,7 @@
   2) формулы покрыты unit-тестами;
   3) UI корректно показывает состояние без бизнес-логики в Godot.
 
-### Issue-F: Contracts & Wages v1
+### [ ] Issue-F: Contracts & Wages v1
 - Goal:
   - ввести контракты и регулярные выплаты/риски ухода.
 - Changes:
@@ -108,7 +108,7 @@
   2) тесты покрывают просрочку, продление и уход;
   3) экономика не нарушает базовые инварианты `LudusState`.
 
-### Issue-G: Daily Events v1
+### [ ] Issue-G: Daily Events v1
 - Goal:
   - добавить события дня с выбором игрока и последствиями.
 - Changes:
@@ -155,20 +155,16 @@
   3) получить явный апрув плана;
   4) только после апрува начинать реализацию в отдельной issue-ветке.
 - Для каждого issue:
+  0) если числового GitHub issue ещё нет, сначала создать issue в GitHub и зафиксировать его номер `#<number>`;
   1) ветка `issue/<number>-<slug>` от актуальной `main`;
   2) изменения только в рамках issue;
   3) PR с явной связью `Fixes #<number>` или `Closes #<number>`;
   4) тесты обязательны для изменений в `src/Ludus.Core`;
-  5) при изменении поведения/архитектуры обновляется документация.
+  5) при изменении поведения/архитектуры обновляется документация;
+  6) после merge соответствующего PR выполненный issue обязательно помечается в roadmap как сделанный (`[x]`).
 
 ## Issue-B Implementation Notes
 - Branch: `issue/20-asset-pack-v1-integration`
-- Added local placeholder assets in `game/assets/`:
-  - stats icons (`str`, `agi`, `sta`)
-  - status icons (`fit`, `injured`, `tired`)
-  - arena background and gladiator card visuals
-  - baseline SFX (`hire`, `advance_day`, `fight`)
-- Integrated into Godot UI:
-  - `game/scenes/Main.tscn` now references the new visual assets
-  - `game/scripts/Main.cs` loads textures/audio with fallbacks and plays SFX on actions
-- MVP flow preserved: `New Game`, `Hire Random`, `Advance Day`, `Simulate Fight`.
+- Added local placeholder assets in `game/assets/` (icons, arena background, card visuals, baseline SFX).
+- Integrated assets into `game/scenes/Main.tscn` and `game/scripts/Main.cs` with safe runtime loading and SFX playback.
+- Existing MVP actions stay functional: `New Game`, `Hire Random`, `Advance Day`, `Simulate Fight`.
