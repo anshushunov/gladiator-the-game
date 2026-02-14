@@ -58,3 +58,6 @@ gh pr create --title "Title" --body "Line 1\nLine 2\nLine 3"
 # Не правильно (вызывает ошибки):
 gh pr create --title "Title" --body "Line 1" --body "Line 2"
 ```
+
+## GitHub/Git вне песочницы
+- Операции `git` и `gh` разрешено выполнять вне песочницы, если это нужно для рабочего процесса (ветки, push, PR, issue).
