@@ -36,34 +36,127 @@
 - Победитель сохраняет остаток HP, проигравший остаётся в ростере с `HP = 0`.
 - Игра остаётся в основном экране: можно сразу продолжать найм, дни и следующие бои.
 
-## Name Generator (Issue #14)
-- Core API:
-  - `INameGenerator.GenerateNext()` -> returns next unique `prefix + cognomen` name, throws `NameGenerationException` when pool is exhausted.
-  - `INameGenerator.TryGenerate(out string name)` -> returns `false` when pool is exhausted.
-- Determinism:
-  - `NameGenerator` uses `SeededRng`; same `seed + input lists` produces the same sequence.
-- Validation rules:
-  - `prefixes` and `cognomens` must be non-empty.
-  - list items are trimmed and cannot be empty.
-  - duplicates are rejected with `ValidationException`.
-- Scope:
-  - implementation is in `src/Ludus.Core/`.
-  - behavior is covered by tests in `src/Ludus.Tests/NameGeneratorTests.cs` and `src/Ludus.Tests/NameGeneratorStabilityTests.cs`.
+## Post-MVP Roadmap
 
-## Combat v2 (Issue #15)
-- Core contract:
-  - `CombatResolver` in `src/Ludus.Core/CombatResolver.cs` resolves one attack and emits combat events.
-  - `CombatModel` in `src/Ludus.Core/CombatModel.cs` defines deterministic formula parameters.
-- Formula order:
-  - hit roll (attacker agility vs defender agility, clamped by model bounds)
-  - base damage with variance
-  - base defense reduction (from defender stamina)
-  - crit roll (only after successful hit), then crit multiplier
-  - final floor policy (`MinDamageAfterDefense`, default is `1`)
-- Event stream:
-  - `Hit`, `Miss`, `Crit`, `DamageApplied`, `Kill`, `FightEnd`
-- Determinism:
-  - all random decisions are made through `IRng`/`SeededRng`
-  - same inputs + same `seed` produce identical combat logs
-- Coverage:
-  - combat invariants and regression scenarios are in `src/Ludus.Tests/CombatV2Tests.cs`.
+### Issue-0: Post-MVP roadmap in README
+- Goal:
+  - фиксируем post-MVP направление, декомпозицию задач и критерии проверки в документации.
+- Scope:
+  - только документация (`README.md`), без изменений игрового кода.
+- Definition of Done:
+  - roadmap и правила исполнения описаны в `README.md`;
+  - у каждого следующего issue есть цель и "как проверить";
+  - `dotnet test` проходит без регрессий.
+
+### Issue-A: UI Foundation v2
+- Goal:
+  - сделать более живой и читаемый основной экран (HUD, ростер, бой, события).
+- Changes:
+  - `game/scenes/Main.tscn`, `game/scripts/Main.cs` (только UI/интеграция, без переноса логики из Core).
+- How to verify:
+  1) интерфейс читаем на desktop/mobile;
+  2) текущие сценарии MVP (new game, hire, advance day, fight) работают как раньше;
+  3) нет регрессии в отображении статуса боя и списка гладиаторов.
+
+### Issue-B: Asset Pack v1 Integration
+- Goal:
+  - добавить первые ассеты для атмосферы и читаемости.
+- Changes:
+  - иконки статов, фон арены, карточки гладиаторов, базовые SFX-плейсхолдеры.
+- How to verify:
+  1) ассеты загружаются без ошибок;
+  2) нет битых путей/ресурсов в Godot;
+  3) визуал не ломает существующие UI-сценарии.
+
+### Issue-C: Training System v1 (Core-first)
+- Goal:
+  - добавить назначение тренировок и применение эффектов на дневном тике.
+- Changes:
+  - `src/Ludus.Core` + тесты в `src/Ludus.Tests`.
+- How to verify:
+  1) одинаковый `seed` -> одинаковый прогресс;
+  2) тесты на ограничения, прирост статов и инварианты проходят;
+  3) UI только отображает состояние, логика живет в Core.
+
+### Issue-D: Injuries & Recovery v1
+- Goal:
+  - добавить травмы после боя и восстановление по дням.
+- Changes:
+  - шанс/тип травмы, длительность восстановления, ограничения участия в бою.
+- How to verify:
+  1) травмы детерминированы по seed;
+  2) боец в восстановлении корректно ограничен;
+  3) тесты проверяют граничные случаи и снятие ограничений.
+
+### Issue-E: Morale/Fatigue v1
+- Goal:
+  - добавить мораль и усталость как факторы эффективности.
+- Changes:
+  - расчет модификаторов для боя/тренировок, переходы состояний по дням.
+- How to verify:
+  1) значения находятся в валидных диапазонах;
+  2) формулы покрыты unit-тестами;
+  3) UI корректно показывает состояние без бизнес-логики в Godot.
+
+### Issue-F: Contracts & Wages v1
+- Goal:
+  - ввести контракты и регулярные выплаты/риски ухода.
+- Changes:
+  - контрактные условия, продление, последствия просрочки выплат.
+- How to verify:
+  1) денежные расчеты детерминированы;
+  2) тесты покрывают просрочку, продление и уход;
+  3) экономика не нарушает базовые инварианты `LudusState`.
+
+### Issue-G: Daily Events v1
+- Goal:
+  - добавить события дня с выбором игрока и последствиями.
+- Changes:
+  - event-driven модель дневных событий в Core и отображение в UI.
+- How to verify:
+  1) события воспроизводимы по seed;
+  2) выбор игрока дает корректные и тестируемые последствия;
+  3) поведение не ломает текущий loop по дням.
+
+## Visual Direction v1
+- Mood:
+  - gritty arena management, "грязный" римский менеджмент, а не стерильный UI.
+- UI priorities:
+  - четкие панели: ростер, экономика, бой, события;
+  - контрастные состояния (раны, усталость, победа/поражение);
+  - читаемость важнее декоративной плотности.
+- First assets:
+  - иконки `STR/AGI/STA`, статусы `Injured/Fit/Tired`;
+  - 1-2 фоновых изображения арены;
+  - базовые карточки гладиатора и простые аудио-плейсхолдеры.
+
+## Mechanics Direction v1 (Ludus Management)
+- Core loop after MVP:
+  1) найм/состав;
+  2) план тренировок;
+  3) дневной тик (экономика/восстановление/события);
+  4) бой и последствия;
+  5) корректировка состава и планов.
+- Pillars:
+  - тренировки;
+  - травмы и восстановление;
+  - мораль/усталость;
+  - контракты и выплаты;
+  - события дня.
+- Core rule:
+  - вся симуляция и бизнес-правила в `src/Ludus.Core`;
+  - Godot-слой (`game/`) отвечает только за UI/визуал/интеграцию.
+
+## Execution Policy
+- `1 Issue = 1 PR` без смешения feature и refactor.
+- Перед реализацией любой фичи обязательно пройти flow:
+  1) выбрать фичу из раздела `Post-MVP Roadmap`;
+  2) подготовить отдельный план по выбранной фиче (scope, AC, test cases, touched areas);
+  3) получить явный апрув плана;
+  4) только после апрува начинать реализацию в отдельной issue-ветке.
+- Для каждого issue:
+  1) ветка `issue/<number>-<slug>` от актуальной `main`;
+  2) изменения только в рамках issue;
+  3) PR с явной связью `Fixes #<number>` или `Closes #<number>`;
+  4) тесты обязательны для изменений в `src/Ludus.Core`;
+  5) при изменении поведения/архитектуры обновляется документация.
