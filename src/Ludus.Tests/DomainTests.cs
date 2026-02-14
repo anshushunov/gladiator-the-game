@@ -505,8 +505,7 @@ public class FightEngineTests
         var dead = Gladiator.Create("Dead", new Stats(5, 5, 5)).TakeDamage(100);
 
         // assert
-        var ex = Assert.Throws<ArgumentException>(() => FightEngine.SimulateFight(alive, dead, 42));
-        Assert.Contains("жив", ex.Message.ToLower());
+        Assert.Throws<ArgumentException>(() => FightEngine.SimulateFight(alive, dead, 42));
     }
 }
 

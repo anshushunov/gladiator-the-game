@@ -44,3 +44,21 @@
 - Scope:
   - implementation is in `src/Ludus.Core/`.
   - behavior is covered by tests in `src/Ludus.Tests/NameGeneratorTests.cs` and `src/Ludus.Tests/NameGeneratorStabilityTests.cs`.
+
+## Combat v2 (Issue #15)
+- Core contract:
+  - `CombatResolver` in `src/Ludus.Core/CombatResolver.cs` resolves one attack and emits combat events.
+  - `CombatModel` in `src/Ludus.Core/CombatModel.cs` defines deterministic formula parameters.
+- Formula order:
+  - hit roll (attacker agility vs defender agility, clamped by model bounds)
+  - base damage with variance
+  - base defense reduction (from defender stamina)
+  - crit roll (only after successful hit), then crit multiplier
+  - final floor policy (`MinDamageAfterDefense`, default is `1`)
+- Event stream:
+  - `Hit`, `Miss`, `Crit`, `DamageApplied`, `Kill`, `FightEnd`
+- Determinism:
+  - all random decisions are made through `IRng`/`SeededRng`
+  - same inputs + same `seed` produce identical combat logs
+- Coverage:
+  - combat invariants and regression scenarios are in `src/Ludus.Tests/CombatV2Tests.cs`.
