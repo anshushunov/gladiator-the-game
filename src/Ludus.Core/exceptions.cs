@@ -15,3 +15,11 @@ public class LudusException : Exception
 {
     public LudusException(string message) : base(message) { }
 }
+
+/// <summary>
+/// Исключение для ошибок генерации имён (например, исчерпание пула).
+/// </summary>
+public class NameGenerationException : Exception
+{
+    public NameGenerationException(string message) : base(message) { }
+}

@@ -487,7 +487,7 @@ public class FightEngineTests
     {
         // arrange — защитник ловкий, атакующий слабый
         var weakAttacker = Gladiator.Create("WeakAtk", new Stats(3, 8, 6));
-            var strongDefender = Gladiator.Create("StrongDef", new Stats(5, 10, 10));
+        var strongDefender = Gladiator.Create("StrongDef", new Stats(5, 10, 10));
 
         // act
         var result = FightEngine.SimulateFight(weakAttacker, strongDefender, 123);

@@ -30,3 +30,17 @@
 3) Провести бой (авторезолв)
 4) Получить деньги/травмы/прогресс
 5) Повторить
+
+## Name Generator (Issue #14)
+- Core API:
+  - `INameGenerator.GenerateNext()` -> returns next unique `prefix + cognomen` name, throws `NameGenerationException` when pool is exhausted.
+  - `INameGenerator.TryGenerate(out string name)` -> returns `false` when pool is exhausted.
+- Determinism:
+  - `NameGenerator` uses `SeededRng`; same `seed + input lists` produces the same sequence.
+- Validation rules:
+  - `prefixes` and `cognomens` must be non-empty.
+  - list items are trimmed and cannot be empty.
+  - duplicates are rejected with `ValidationException`.
+- Scope:
+  - implementation is in `src/Ludus.Core/`.
+  - behavior is covered by tests in `src/Ludus.Tests/NameGeneratorTests.cs` and `src/Ludus.Tests/NameGeneratorStabilityTests.cs`.
