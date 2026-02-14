@@ -1,6 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://main_scene"]
+﻿[gd_scene load_steps=13 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/Main.cs" id="1a2b3c"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/arena_bg_01.svg" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/icons/stats/str.svg" id="3_str"]
+[ext_resource type="Texture2D" path="res://assets/icons/stats/agi.svg" id="4_agi"]
+[ext_resource type="Texture2D" path="res://assets/icons/stats/sta.svg" id="5_sta"]
+[ext_resource type="Texture2D" path="res://assets/icons/status/fit.svg" id="6_fit"]
+[ext_resource type="Texture2D" path="res://assets/icons/status/injured.svg" id="7_inj"]
+[ext_resource type="Texture2D" path="res://assets/icons/status/tired.svg" id="8_tired"]
+[ext_resource type="Texture2D" path="res://assets/cards/gladiator_card_bg.svg" id="9_card"]
 
 [node name="Main" type="CanvasLayer"]
 script = ExtResource("1a2b3c")
@@ -13,6 +21,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="BgArena" type="TextureRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
 [node name="BgBase" type="ColorRect" parent="Control"]
 layout_mode = 1
 anchors_preset = 15
@@ -20,7 +39,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.09, 0.08, 0.06, 1)
+color = Color(0.09, 0.08, 0.06, 0.85)
 
 [node name="BgGlow" type="ColorRect" parent="Control"]
 layout_mode = 1
@@ -67,7 +86,18 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="LabelDay" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin"]
+[node name="DayBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DayIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin/DayBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("3_str")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelDay" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin/DayBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.97, 0.97, 0.95, 1)
 theme_override_font_sizes/font_size = 20
@@ -84,7 +114,18 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="LabelMoney" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin"]
+[node name="MoneyBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MoneyIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/MoneyBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("4_agi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelMoney" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/MoneyBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.91, 0.92, 0.78, 1)
 theme_override_font_sizes/font_size = 20
@@ -101,7 +142,18 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="LabelSeed" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin"]
+[node name="SeedBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SeedIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/SeedBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("5_sta")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelSeed" type="Label" parent="Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/SeedBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.8, 0.75, 1)
 theme_override_font_sizes/font_size = 18
@@ -147,6 +199,50 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.83, 0.62, 1)
 theme_override_font_sizes/font_size = 22
 text = "Roster"
+
+[node name="CardDecor" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 40)
+texture = ExtResource("9_card")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="StatusLegend" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="FitIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
+layout_mode = 2
+custom_minimum_size = Vector2(14, 14)
+texture = ExtResource("6_fit")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FitLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
+layout_mode = 2
+text = "Fit"
+
+[node name="InjuredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
+layout_mode = 2
+custom_minimum_size = Vector2(14, 14)
+texture = ExtResource("7_inj")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InjuredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
+layout_mode = 2
+text = "Injured"
+
+[node name="TiredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
+layout_mode = 2
+custom_minimum_size = Vector2(14, 14)
+texture = ExtResource("8_tired")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TiredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/StatusLegend"]
+layout_mode = 2
+text = "Tired"
 
 [node name="ListGladiators" type="ItemList" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
 layout_mode = 2
@@ -219,3 +315,12 @@ custom_minimum_size = Vector2(420, 220)
 autowrap_mode = 2
 scroll_active = true
 text = "Fight log appears here..."
+
+[node name="SfxHire" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
+
+[node name="SfxAdvanceDay" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
+
+[node name="SfxFight" type="AudioStreamPlayer" parent="."]
+volume_db = -6.0

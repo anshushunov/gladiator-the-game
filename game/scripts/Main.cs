@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -11,6 +11,11 @@ namespace Ludus.Game;
 /// </summary>
 public partial class Main : CanvasLayer
 {
+	private const string PortraitPath = "res://assets/cards/gladiator_portrait_placeholder.svg";
+	private const string HireSfxPath = "res://assets/sfx/hire.wav";
+	private const string AdvanceDaySfxPath = "res://assets/sfx/advance_day.wav";
+	private const string FightSfxPath = "res://assets/sfx/fight.wav";
+
 	private LudusState _state = LudusState.Empty;
 
 	private Control? _root;
@@ -27,6 +32,11 @@ public partial class Main : CanvasLayer
 	private Label? _fightStatus;
 	private Button? _btnSimulateFight;
 
+	private AudioStreamPlayer? _sfxHire;
+	private AudioStreamPlayer? _sfxAdvanceDay;
+	private AudioStreamPlayer? _sfxFight;
+	private Texture2D? _portraitTexture;
+
 	private Guid? _firstFighterId;
 	private Guid? _secondFighterId;
 	private List<Gladiator> _aliveForSelection = [];
@@ -35,9 +45,9 @@ public partial class Main : CanvasLayer
 	{
 		_root = GetNode<Control>("Control");
 		_mainGrid = GetNode<GridContainer>("Control/MarginContainer/RootVBox/MainGrid");
-		_labelDay = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin/LabelDay");
-		_labelMoney = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/LabelMoney");
-		_labelSeed = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/LabelSeed");
+		_labelDay = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin/DayBox/LabelDay");
+		_labelMoney = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/MoneyBox/LabelMoney");
+		_labelSeed = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/SeedBox/LabelSeed");
 		_listGladiators = GetNode<ItemList>("Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/ListGladiators");
 		_firstFighterSelect = GetNode<OptionButton>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/FirstPicker/FirstFighterSelect");
 		_secondFighterSelect = GetNode<OptionButton>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/SecondPicker/SecondFighterSelect");
@@ -49,6 +59,24 @@ public partial class Main : CanvasLayer
 		var btnNewGame = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnNewGame");
 		var btnHireRandom = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnHireRandom");
 		var btnAdvanceDay = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnAdvanceDay");
+
+		_sfxHire = GetNode<AudioStreamPlayer>("SfxHire");
+		_sfxAdvanceDay = GetNode<AudioStreamPlayer>("SfxAdvanceDay");
+		_sfxFight = GetNode<AudioStreamPlayer>("SfxFight");
+
+		_portraitTexture = TryLoad<Texture2D>(PortraitPath);
+		if (_sfxHire is not null)
+		{
+			_sfxHire.Stream = TryLoad<AudioStream>(HireSfxPath);
+		}
+		if (_sfxAdvanceDay is not null)
+		{
+			_sfxAdvanceDay.Stream = TryLoad<AudioStream>(AdvanceDaySfxPath);
+		}
+		if (_sfxFight is not null)
+		{
+			_sfxFight.Stream = TryLoad<AudioStream>(FightSfxPath);
+		}
 
 		btnNewGame.Pressed += OnNewGamePressed;
 		btnHireRandom.Pressed += OnHireRandomPressed;
@@ -73,12 +101,14 @@ public partial class Main : CanvasLayer
 	public void OnHireRandomPressed()
 	{
 		_state = _state.HireRandomGladiator();
+		TryPlay(_sfxHire);
 		UpdateUI();
 	}
 
 	public void OnAdvanceDayPressed()
 	{
 		_state = _state.AdvanceDay();
+		TryPlay(_sfxAdvanceDay);
 		UpdateUI();
 	}
 
@@ -137,6 +167,7 @@ public partial class Main : CanvasLayer
 		_firstFighterId = null;
 		_secondFighterId = null;
 
+		TryPlay(_sfxFight);
 		_fightLog!.Text = result.Log.ToString();
 		_fightLog.ScrollToLine(0);
 		_fightStatus!.Text = $"Winner: {result.Winner.Name} (HP {result.Winner.Health}/{result.Winner.MaxHealth})";
@@ -172,7 +203,7 @@ public partial class Main : CanvasLayer
 		_listGladiators!.Clear();
 		if (_state.Gladiators.Count == 0)
 		{
-			_listGladiators.AddItem("No gladiators hired yet.");
+			_listGladiators.AddItem("No gladiators hired yet.", _portraitTexture);
 		}
 		else
 		{
@@ -180,7 +211,7 @@ public partial class Main : CanvasLayer
 			{
 				var stateText = g.IsAlive ? "FIT" : "OUT";
 				var row = $"{g.Name} [{stateText}]  HP {g.Health}/{g.MaxHealth}  STR {g.Stats.Strength}  AGI {g.Stats.Agility}  STA {g.Stats.Stamina}";
-				_listGladiators.AddItem(row);
+				_listGladiators.AddItem(row, _portraitTexture);
 			}
 		}
 
@@ -264,5 +295,25 @@ public partial class Main : CanvasLayer
 
 		var fighter = _aliveForSelection.FirstOrDefault(g => g.Id == fighterId.Value);
 		return fighter.Id == Guid.Empty ? null : fighter.Name;
+	}
+
+	private static T? TryLoad<T>(string path) where T : Resource
+	{
+		var resource = ResourceLoader.Load(path);
+		if (resource is T typed)
+		{
+			return typed;
+		}
+
+		GD.PushWarning($"Failed to load resource as {typeof(T).Name}: {path}");
+		return null;
+	}
+
+	private static void TryPlay(AudioStreamPlayer? player)
+	{
+		if (player?.Stream is not null)
+		{
+			player.Play();
+		}
 	}
 }

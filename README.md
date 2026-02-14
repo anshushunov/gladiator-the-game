@@ -162,3 +162,9 @@
   4) тесты обязательны для изменений в `src/Ludus.Core`;
   5) при изменении поведения/архитектуры обновляется документация;
   6) после merge соответствующего PR выполненный issue обязательно помечается в roadmap как сделанный (`[x]`).
+
+## Issue-B Implementation Notes
+- Branch: `issue/20-asset-pack-v1-integration`
+- Added local placeholder assets in `game/assets/` (icons, arena background, card visuals, baseline SFX).
+- Integrated assets into `game/scenes/Main.tscn` and `game/scripts/Main.cs` with safe runtime loading and SFX playback.
+- Existing MVP actions stay functional: `New Game`, `Hire Random`, `Advance Day`, `Simulate Fight`.
