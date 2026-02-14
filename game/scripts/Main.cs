@@ -1,62 +1,72 @@
-﻿using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Ludus.Core;
 
 namespace Ludus.Game;
 
 /// <summary>
-/// Главный скрипт сцены. Управляет UI и интеграцией с Ludus.Core.
-/// Предоставляет выбор двух гладиаторов и запуск симуляции боя.
+/// Main scene controller for UI and integration with Ludus.Core.
 /// </summary>
 public partial class Main : CanvasLayer
 {
 	private LudusState _state = LudusState.Empty;
+
+	private Control? _root;
+	private GridContainer? _mainGrid;
 	private Label? _labelDay;
 	private Label? _labelMoney;
 	private Label? _labelSeed;
-	private Label? _listGladiators;
+	private ItemList? _listGladiators;
 
-	// UI для боя
+	private OptionButton? _firstFighterSelect;
+	private OptionButton? _secondFighterSelect;
+	private Label? _selectionStatus;
 	private RichTextLabel? _fightLog;
 	private Label? _fightStatus;
 	private Button? _btnSimulateFight;
-	private Label? _labelFightSelection;
 
-	private int? _firstFighterIndex;
-	private int? _secondFighterIndex;
+	private Guid? _firstFighterId;
+	private Guid? _secondFighterId;
+	private List<Gladiator> _aliveForSelection = [];
 
 	public override void _Ready()
 	{
-		_labelDay = GetNode<Label>("/root/Main/Control/CenterContainer/VBoxContainer/StatsHBox/LabelDay");
-		_labelMoney = GetNode<Label>("/root/Main/Control/CenterContainer/VBoxContainer/StatsHBox/LabelMoney");
-		_labelSeed = GetNode<Label>("/root/Main/Control/CenterContainer/VBoxContainer/StatsHBox/LabelSeed");
-		_listGladiators = GetNode<Label>("/root/Main/Control/CenterContainer/VBoxContainer/ListGladiators");
-		_fightLog = GetNode<RichTextLabel>("/root/Main/Control/CenterContainer/VBoxContainer/FightLog");
-		_fightStatus = GetNode<Label>("/root/Main/Control/CenterContainer/VBoxContainer/FightStatus");
-		_btnSimulateFight = GetNode<Button>("/root/Main/Control/CenterContainer/VBoxContainer/btnSimulateFight");
-		_labelFightSelection = GetNode<Label>("/root/Main/Control/CenterContainer/VBoxContainer/LabelFightSelection");
+		_root = GetNode<Control>("Control");
+		_mainGrid = GetNode<GridContainer>("Control/MarginContainer/RootVBox/MainGrid");
+		_labelDay = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/DayPanel/DayMargin/LabelDay");
+		_labelMoney = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/LabelMoney");
+		_labelSeed = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/LabelSeed");
+		_listGladiators = GetNode<ItemList>("Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/ListGladiators");
+		_firstFighterSelect = GetNode<OptionButton>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/FirstPicker/FirstFighterSelect");
+		_secondFighterSelect = GetNode<OptionButton>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/SecondPicker/SecondFighterSelect");
+		_selectionStatus = GetNode<Label>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/SelectionStatus");
+		_fightLog = GetNode<RichTextLabel>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FightLog");
+		_fightStatus = GetNode<Label>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FightStatus");
+		_btnSimulateFight = GetNode<Button>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/btnSimulateFight");
 
-		var btnNewGame = GetNode<Button>("/root/Main/Control/CenterContainer/VBoxContainer/HireHBox/btnNewGame");
-		var btnHireRandom = GetNode<Button>("/root/Main/Control/CenterContainer/VBoxContainer/HireHBox/btnHireRandom");
-		var btnAdvanceDay = GetNode<Button>("/root/Main/Control/CenterContainer/VBoxContainer/HireHBox/btnAdvanceDay");
-		var btnSelectFirst = GetNode<Button>("/root/Main/Control/CenterContainer/VBoxContainer/FightSelectionHBox/btnSelectFirst");
-		var btnSelectSecond = GetNode<Button>("/root/Main/Control/CenterContainer/VBoxContainer/FightSelectionHBox/btnSelectSecond");
+		var btnNewGame = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnNewGame");
+		var btnHireRandom = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnHireRandom");
+		var btnAdvanceDay = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnAdvanceDay");
 
 		btnNewGame.Pressed += OnNewGamePressed;
 		btnHireRandom.Pressed += OnHireRandomPressed;
 		btnAdvanceDay.Pressed += OnAdvanceDayPressed;
-		btnSelectFirst.Pressed += OnSelectFirstFighterPressed;
-		btnSelectSecond.Pressed += OnSelectSecondFighterPressed;
 		_btnSimulateFight!.Pressed += OnSimulateFightPressed;
+		_firstFighterSelect!.ItemSelected += OnFirstFighterSelected;
+		_secondFighterSelect!.ItemSelected += OnSecondFighterSelected;
+		_root!.Resized += OnRootResized;
 
+		UpdateLayoutByWidth();
 		UpdateUI();
 	}
 
 	public void OnNewGamePressed()
 	{
 		_state = LudusState.NewGame(LudusState.DefaultSeed);
-		_firstFighterIndex = null;
-		_secondFighterIndex = null;
+		_firstFighterId = null;
+		_secondFighterId = null;
 		UpdateUI();
 	}
 
@@ -72,107 +82,187 @@ public partial class Main : CanvasLayer
 		UpdateUI();
 	}
 
-	public void OnSelectFirstFighterPressed()
+	private void OnFirstFighterSelected(long index)
 	{
-		var alive = _state.AliveGladiators;
-		if (alive.Count >= 1)
+		if (index < 0 || index >= _aliveForSelection.Count)
 		{
-			_firstFighterIndex = 0;
-			if (_secondFighterIndex == _firstFighterIndex)
-			{
-				_secondFighterIndex = null;
-			}
+			_firstFighterId = null;
+			UpdateUI();
+			return;
 		}
+
+		_firstFighterId = _aliveForSelection[(int)index].Id;
+		if (_firstFighterId == _secondFighterId)
+		{
+			_secondFighterId = null;
+		}
+
 		UpdateUI();
 	}
 
-	public void OnSelectSecondFighterPressed()
+	private void OnSecondFighterSelected(long index)
 	{
-		var alive = _state.AliveGladiators;
-		if (alive.Count >= 2)
+		if (index < 0 || index >= _aliveForSelection.Count)
 		{
-			_secondFighterIndex = 1;
+			_secondFighterId = null;
+			UpdateUI();
+			return;
 		}
+
+		_secondFighterId = _aliveForSelection[(int)index].Id;
+		if (_secondFighterId == _firstFighterId)
+		{
+			_firstFighterId = null;
+		}
+
 		UpdateUI();
 	}
 
 	public void OnSimulateFightPressed()
 	{
-		if (!_firstFighterIndex.HasValue || !_secondFighterIndex.HasValue)
+		if (!_firstFighterId.HasValue || !_secondFighterId.HasValue)
 		{
-			_fightStatus?.SetText("Ошибка: выберите двух гладиаторов");
+			_fightStatus!.Text = "Select two different fighters.";
 			return;
 		}
 
-		var alive = _state.AliveGladiators;
-		if (_firstFighterIndex.Value >= alive.Count || _secondFighterIndex.Value >= alive.Count)
+		if (_firstFighterId.Value == _secondFighterId.Value)
 		{
-			_fightStatus?.SetText("Ошибка: неверные индексы гладиаторов");
+			_fightStatus!.Text = "Fighters must be different.";
 			return;
 		}
 
-		var first = alive[_firstFighterIndex.Value];
-		var second = alive[_secondFighterIndex.Value];
-
-		if (first.Id == second.Id)
-		{
-			_fightStatus?.SetText("Ошибка: гладиаторы не могут быть одинаковыми");
-			return;
-		}
-
-		var (updatedState, result) = _state.ResolveFight(first.Id, second.Id);
+		var (updatedState, result) = _state.ResolveFight(_firstFighterId.Value, _secondFighterId.Value);
 		_state = updatedState;
-		_firstFighterIndex = null;
-		_secondFighterIndex = null;
+		_firstFighterId = null;
+		_secondFighterId = null;
 
-		if (_fightLog is not null)
-		{
-			_fightLog.Text = result.Log.ToString();
-			_fightLog.ScrollToLine(0);
-		}
-		_fightStatus?.SetText($"Победитель: {result.Winner.Name} (HP: {result.Winner.Health}/{result.Winner.MaxHealth})");
+		_fightLog!.Text = result.Log.ToString();
+		_fightLog.ScrollToLine(0);
+		_fightStatus!.Text = $"Winner: {result.Winner.Name} (HP {result.Winner.Health}/{result.Winner.MaxHealth})";
 
 		UpdateUI();
 	}
 
+	private void OnRootResized()
+	{
+		UpdateLayoutByWidth();
+	}
+
+	private void UpdateLayoutByWidth()
+	{
+		if (_root is null || _mainGrid is null)
+		{
+			return;
+		}
+
+		var width = _root.Size.X;
+		_mainGrid.Columns = width < 980 ? 1 : 2;
+	}
+
 	private void UpdateUI()
 	{
-		NormalizeSelection();
+		UpdateLayoutByWidth();
+		SyncSelectionWithAliveRoster();
 
-		_labelDay?.SetText($"Day: {_state.Day}");
-		_labelMoney?.SetText($"Money: {_state.Money}");
-		_labelSeed?.SetText($"Seed: {_state.Seed}");
+		_labelDay!.Text = $"Day {_state.Day}";
+		_labelMoney!.Text = $"Money {_state.Money}";
+		_labelSeed!.Text = $"Seed {_state.Seed}";
 
-		var gladiatorText = string.Join("\n", _state.Gladiators.Select((g, i) =>
-			$"{i}: {g.Name} | HP: {g.Health}/{g.MaxHealth} | Str: {g.Stats.Strength}, Agi: {g.Stats.Agility}, Sta: {g.Stats.Stamina}"));
-		_listGladiators?.SetText(gladiatorText);
+		_listGladiators!.Clear();
+		if (_state.Gladiators.Count == 0)
+		{
+			_listGladiators.AddItem("No gladiators hired yet.");
+		}
+		else
+		{
+			foreach (var g in _state.Gladiators)
+			{
+				var stateText = g.IsAlive ? "FIT" : "OUT";
+				var row = $"{g.Name} [{stateText}]  HP {g.Health}/{g.MaxHealth}  STR {g.Stats.Strength}  AGI {g.Stats.Agility}  STA {g.Stats.Stamina}";
+				_listGladiators.AddItem(row);
+			}
+		}
 
-		var alive = _state.AliveGladiators;
-		string firstText = _firstFighterIndex.HasValue ? $"First: {alive[_firstFighterIndex.Value].Name}" : "First: не выбран";
-		string secondText = _secondFighterIndex.HasValue ? $"Second: {alive[_secondFighterIndex.Value].Name}" : "Second: не выбран";
-		_labelFightSelection?.SetText($"Выбор: [{firstText}] vs [{secondText}]");
-		_btnSimulateFight?.SetDisabled(!(_firstFighterIndex.HasValue && _secondFighterIndex.HasValue));
+		RebuildFightSelectors();
+
+		var firstText = NameById(_firstFighterId) ?? "not selected";
+		var secondText = NameById(_secondFighterId) ?? "not selected";
+		_selectionStatus!.Text = $"Selection: {firstText} vs {secondText}";
+
+		var canFight = _aliveForSelection.Count >= 2 && _firstFighterId.HasValue && _secondFighterId.HasValue;
+		_btnSimulateFight!.Disabled = !canFight;
+
+		if (_aliveForSelection.Count < 2)
+		{
+			_fightStatus!.Text = "Need at least two alive gladiators.";
+		}
 	}
 
-	private void NormalizeSelection()
+	private void SyncSelectionWithAliveRoster()
 	{
-		int aliveCount = _state.AliveGladiators.Count;
+		_aliveForSelection = _state.AliveGladiators.ToList();
 
-		if (_firstFighterIndex.HasValue && _firstFighterIndex.Value >= aliveCount)
+		if (_firstFighterId.HasValue && !_aliveForSelection.Any(g => g.Id == _firstFighterId.Value))
 		{
-			_firstFighterIndex = null;
+			_firstFighterId = null;
 		}
 
-		if (_secondFighterIndex.HasValue && _secondFighterIndex.Value >= aliveCount)
+		if (_secondFighterId.HasValue && !_aliveForSelection.Any(g => g.Id == _secondFighterId.Value))
 		{
-			_secondFighterIndex = null;
+			_secondFighterId = null;
 		}
 
-		if (_firstFighterIndex.HasValue && _secondFighterIndex.HasValue &&
-			_firstFighterIndex.Value == _secondFighterIndex.Value)
+		if (_firstFighterId == _secondFighterId)
 		{
-			_secondFighterIndex = null;
+			_secondFighterId = null;
 		}
+	}
+
+	private void RebuildFightSelectors()
+	{
+		_firstFighterSelect!.Clear();
+		_secondFighterSelect!.Clear();
+
+		foreach (var g in _aliveForSelection)
+		{
+			var item = $"{g.Name} ({g.Health}/{g.MaxHealth} HP)";
+			_firstFighterSelect.AddItem(item);
+			_secondFighterSelect.AddItem(item);
+		}
+
+		SelectById(_firstFighterSelect, _firstFighterId);
+		SelectById(_secondFighterSelect, _secondFighterId);
+	}
+
+	private void SelectById(OptionButton select, Guid? fighterId)
+	{
+		if (!fighterId.HasValue)
+		{
+			select.Select(-1);
+			return;
+		}
+
+		for (var i = 0; i < _aliveForSelection.Count; i++)
+		{
+			if (_aliveForSelection[i].Id == fighterId.Value)
+			{
+				select.Select(i);
+				return;
+			}
+		}
+
+		select.Select(-1);
+	}
+
+	private string? NameById(Guid? fighterId)
+	{
+		if (!fighterId.HasValue)
+		{
+			return null;
+		}
+
+		var fighter = _aliveForSelection.FirstOrDefault(g => g.Id == fighterId.Value);
+		return fighter.Id == Guid.Empty ? null : fighter.Name;
 	}
 }
-
