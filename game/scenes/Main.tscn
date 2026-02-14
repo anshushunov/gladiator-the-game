@@ -1,155 +1,286 @@
-[gd_scene load_steps=2 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=10 format=3 uid="uid://main_scene"]
 
 [ext_resource type="Script" path="res://scripts/Main.cs" id="1a2b3c"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/arena_bg_01.svg" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/icons/stats/str.svg" id="3_str"]
+[ext_resource type="Texture2D" path="res://assets/icons/stats/agi.svg" id="4_agi"]
+[ext_resource type="Texture2D" path="res://assets/icons/stats/sta.svg" id="5_sta"]
+[ext_resource type="Texture2D" path="res://assets/icons/status/fit.svg" id="6_fit"]
+[ext_resource type="Texture2D" path="res://assets/icons/status/injured.svg" id="7_inj"]
+[ext_resource type="Texture2D" path="res://assets/icons/status/tired.svg" id="8_tired"]
+[ext_resource type="Texture2D" path="res://assets/cards/gladiator_card_bg.svg" id="9_card"]
 
 [node name="Main" type="CanvasLayer"]
 script = ExtResource("1a2b3c")
-name = "Main"
 
 [node name="Control" type="Control" parent="."]
-layout_mode = "3"
-anchors_preset = "15"
-anchor_right = "1.0"
-anchor_bottom = "1.0"
-grow_horizontal = "2"
-grow_vertical = "2"
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="Control"]
-layout_mode = "1"
-anchors_preset = "15"
-anchor_right = "1.0"
-anchor_bottom = "1.0"
-grow_horizontal = "2"
-grow_vertical = "2"
+[node name="BgArena" type="TextureRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Control/CenterContainer"]
-layout_mode = "2"
-size_flags_horizontal = 4
+[node name="BgTint" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.08, 0.06, 0.72)
 
-[node name="LabelTitle" type="Label" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-theme_override_colors/font_color = "#FFD700"
-theme_override_font_sizes/font_size = "32"
-theme_override_font_flags/bold = "true"
-text = "Gladiator Ludus - Fight v0"
+[node name="MarginContainer" type="MarginContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
-[node name="Separator1" type="HSeparator" parent="Control/CenterContainer/VBoxContainer"]
+[node name="RootVBox" type="VBoxContainer" parent="Control/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="StatsHBox" type="HBoxContainer" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-alignment = 1
+[node name="LabelTitle" type="Label" parent="Control/MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.67, 1)
+theme_override_font_sizes/font_size = 30
+text = "Gladiator Ludus"
 
-[node name="LabelDay" type="Label" parent="Control/CenterContainer/VBoxContainer/StatsHBox"]
-layout_mode = "2"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_font_sizes/font_size = "24"
+[node name="StatsHBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DayBlock" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/StatsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="IconDay" type="TextureRect" parent="Control/MarginContainer/RootVBox/StatsHBox/DayBlock"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("3_str")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelDay" type="Label" parent="Control/MarginContainer/RootVBox/StatsHBox/DayBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.92, 1)
+theme_override_font_sizes/font_size = 20
 text = "Day: 1"
 
-[node name="LabelMoney" type="Label" parent="Control/CenterContainer/VBoxContainer/StatsHBox"]
-layout_mode = "2"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_font_sizes/font_size = "24"
+[node name="MoneyBlock" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/StatsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="IconMoney" type="TextureRect" parent="Control/MarginContainer/RootVBox/StatsHBox/MoneyBlock"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("4_agi")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelMoney" type="Label" parent="Control/MarginContainer/RootVBox/StatsHBox/MoneyBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.95, 0.92, 1)
+theme_override_font_sizes/font_size = 20
 text = "Money: 100"
 
-[node name="LabelSeed" type="Label" parent="Control/CenterContainer/VBoxContainer/StatsHBox"]
-layout_mode = "2"
-theme_override_colors/font_color = "#AAAAAA"
-theme_override_font_sizes/font_size = "16"
+[node name="SeedBlock" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/StatsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="IconSeed" type="TextureRect" parent="Control/MarginContainer/RootVBox/StatsHBox/SeedBlock"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 20)
+texture = ExtResource("5_sta")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelSeed" type="Label" parent="Control/MarginContainer/RootVBox/StatsHBox/SeedBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.86, 0.83, 1)
+theme_override_font_sizes/font_size = 16
 text = "Seed: 42"
 
-[node name="Separator2" type="HSeparator" parent="Control/CenterContainer/VBoxContainer"]
+[node name="ActionsHBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="ListGladiators" type="Label" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_font_sizes/font_size = "18"
-max_columns = "1"
-autowrap_mode = "1"
-valign = "1"
-text = "Р РЋР С—Р С‘РЎРѓР С•Р С” Р С–Р В»Р В°Р Т‘Р С‘Р В°РЎвЂљР С•РЎР‚Р С•Р Р† Р С—РЎС“РЎРѓРЎвЂљ"
-
-[node name="Separator3" type="HSeparator" parent="Control/CenterContainer/VBoxContainer"]
-
-[node name="HireHBox" type="HBoxContainer" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-alignment = 1
-
-[node name="btnNewGame" type="Button" parent="Control/CenterContainer/VBoxContainer/HireHBox"]
-layout_mode = "2"
+[node name="btnNewGame" type="Button" parent="Control/MarginContainer/RootVBox/ActionsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "New Game"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#4CAF50"
-theme_override_colors/hover_color = "#45a049"
-theme_override_font_sizes/font_size = "18"
 
-[node name="btnHireRandom" type="Button" parent="Control/CenterContainer/VBoxContainer/HireHBox"]
-layout_mode = "2"
+[node name="btnHireRandom" type="Button" parent="Control/MarginContainer/RootVBox/ActionsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Hire Random"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#2196F3"
-theme_override_colors/hover_color = "#1976D2"
-theme_override_font_sizes/font_size = "18"
 
-[node name="btnAdvanceDay" type="Button" parent="Control/CenterContainer/VBoxContainer/HireHBox"]
-layout_mode = "2"
+[node name="btnAdvanceDay" type="Button" parent="Control/MarginContainer/RootVBox/ActionsHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Advance Day"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#FF9800"
-theme_override_colors/hover_color = "#F57C00"
-theme_override_font_sizes/font_size = "18"
 
-[node name="Separator4" type="HSeparator" parent="Control/CenterContainer/VBoxContainer"]
-
-[node name="FightSelectionHBox" type="HBoxContainer" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-alignment = 1
-
-[node name="btnSelectFirst" type="Button" parent="Control/CenterContainer/VBoxContainer/FightSelectionHBox"]
-layout_mode = "2"
-text = "Select First"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#9C27B0"
-theme_override_colors/hover_color = "#8E24AA"
-theme_override_font_sizes/font_size = "16"
-
-[node name="btnSelectSecond" type="Button" parent="Control/CenterContainer/VBoxContainer/FightSelectionHBox"]
-layout_mode = "2"
-text = "Select Second"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#673AB7"
-theme_override_colors/hover_color = "#512DA8"
-theme_override_font_sizes/font_size = "16"
-
-[node name="LabelFightSelection" type="Label" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-theme_override_colors/font_color = "#00FFFF"
-theme_override_font_sizes/font_size = "18"
-text = "Р вЂ™РЎвЂ№Р В±Р ВµРЎР‚Р С‘РЎвЂљР Вµ Р Т‘Р Р†РЎС“РЎвЂ¦ Р С–Р В»Р В°Р Т‘Р С‘Р В°РЎвЂљР С•РЎР‚Р С•Р Р† Р Т‘Р В»РЎРЏ Р В±Р С•РЎРЏ"
-
-[node name="btnSimulateFight" type="Button" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-text = "Simulate Fight"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#F44336"
-theme_override_colors/hover_color = "#D32F2F"
-theme_override_font_sizes/font_size = "20"
-theme_override_font_flags/bold = "true"
-
-[node name="FightLog" type="RichTextLabel" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-custom_minimum_size = Vector2(760, 220)
+[node name="MainGrid" type="GridContainer" parent="Control/MarginContainer/RootVBox"]
+layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = "#FFEB3B"
-theme_override_font_sizes/font_size = "14"
-autowrap_mode = "2"
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 2
+
+[node name="RosterPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/MainGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RosterMargin" type="MarginContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="RosterVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LabelRosterTitle" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.84, 0.66, 1)
+theme_override_font_sizes/font_size = 22
+text = "Roster"
+
+[node name="CardDecor" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+texture = ExtResource("9_card")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="StatusLegend" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FitIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+layout_mode = 2
+custom_minimum_size = Vector2(16, 16)
+texture = ExtResource("6_fit")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FitLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+layout_mode = 2
+text = "Fit"
+
+[node name="InjuredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+layout_mode = 2
+custom_minimum_size = Vector2(16, 16)
+texture = ExtResource("7_inj")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="InjuredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+layout_mode = 2
+text = "Injured"
+
+[node name="TiredIcon" type="TextureRect" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+layout_mode = 2
+custom_minimum_size = Vector2(16, 16)
+texture = ExtResource("8_tired")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TiredLabel" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox/StatusLegend"]
+layout_mode = 2
+text = "Tired"
+
+[node name="ListGladiators" type="ItemList" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterMargin/RosterVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(420, 320)
+
+[node name="FightPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/MainGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="FightMargin" type="MarginContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="FightVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LabelFightTitle" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.84, 0.66, 1)
+theme_override_font_sizes/font_size = 22
+text = "Fight Setup"
+
+[node name="FightSelectionHBox" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="btnSelectFirst" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox/FightSelectionHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Select First"
+
+[node name="btnSelectSecond" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox/FightSelectionHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Select Second"
+
+[node name="LabelFightSelection" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.87, 0.95, 1)
+text = "Selection: [First: not selected] vs [Second: not selected]"
+
+[node name="btnSimulateFight" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+layout_mode = 2
+text = "Simulate Fight"
+
+[node name="FightStatus" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.86, 0.95, 0.78, 1)
+text = ""
+
+[node name="FightLog" type="RichTextLabel" parent="Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightMargin/FightVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(420, 220)
+autowrap_mode = 2
 scroll_active = true
 text = "Fight log appears here..."
 
-[node name="FightStatus" type="Label" parent="Control/CenterContainer/VBoxContainer"]
-layout_mode = "2"
-theme_override_colors/font_color = "#4CAF50"
-theme_override_font_sizes/font_size = "20"
-theme_override_font_flags/bold = "true"
-text = ""
+[node name="SfxHire" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
 
+[node name="SfxAdvanceDay" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
 
+[node name="SfxFight" type="AudioStreamPlayer" parent="."]
+volume_db = -6.0

@@ -160,3 +160,15 @@
   3) PR с явной связью `Fixes #<number>` или `Closes #<number>`;
   4) тесты обязательны для изменений в `src/Ludus.Core`;
   5) при изменении поведения/архитектуры обновляется документация.
+
+## Issue-B Implementation Notes
+- Branch: `issue/20-asset-pack-v1-integration`
+- Added local placeholder assets in `game/assets/`:
+  - stats icons (`str`, `agi`, `sta`)
+  - status icons (`fit`, `injured`, `tired`)
+  - arena background and gladiator card visuals
+  - baseline SFX (`hire`, `advance_day`, `fight`)
+- Integrated into Godot UI:
+  - `game/scenes/Main.tscn` now references the new visual assets
+  - `game/scripts/Main.cs` loads textures/audio with fallbacks and plays SFX on actions
+- MVP flow preserved: `New Game`, `Hire Random`, `Advance Day`, `Simulate Fight`.
