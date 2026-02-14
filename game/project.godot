@@ -8,27 +8,17 @@
 
 config_version=5
 
-[#Godot4.x.NETprojectconfiguration[application]config]
-
-name="Gladiator Ludus"
-
 [application]
 
+config/name="Gladiator Ludus"
+run/main_scene="res://scenes/Main.tscn"
 config/features=PackedStringArray("4.6", "C#")
-
-[config]
-
-features="4.0"
-icon="res://icon.svg"
+config/icon="res://icon.svg"
 
 [dotnet]
 
-project/assembly_name="UnnamedProject"
+project/assembly_name="game"
 
 [editor_profile]
 
 asset_db/path="user://asset_data"
-
-[run]
-
-main_scene="res://scenes/Main.tscn"

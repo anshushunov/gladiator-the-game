@@ -4,6 +4,7 @@
 
 [node name="Main" type="CanvasLayer"]
 script = ExtResource("1a2b3c")
+name = "Main"
 
 [node name="Control" type="Control" parent="."]
 layout_mode = "3"
@@ -28,21 +29,6 @@ grow_horizontal = "0"
 grow_vertical = "0"
 align_center = "true"
 
-[node name="LabelDay" type="Label" parent="Control/VBoxContainer"]
-layout_mode = "0"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_font_sizes/font_size = "24"
-
-[node name="LabelMoney" type="Label" parent="Control/VBoxContainer"]
-layout_mode = "0"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_font_sizes/font_size = "24"
-
-[node name="LabelSeed" type="Label" parent="Control/VBoxContainer"]
-layout_mode = "0"
-theme_override_colors/font_color = "#AAAAAA"
-theme_override_font_sizes/font_size = "16"
-
 [node name="LabelTitle" type="Label" parent="Control/VBoxContainer"]
 layout_mode = "0"
 theme_override_colors/font_color = "#FFD700"
@@ -52,6 +38,29 @@ text = "Gladiator Ludus - Fight v0"
 
 [node name="Separator1" type="HSeparator" parent="Control/VBoxContainer"]
 
+[node name="StatsHBox" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = "0"
+
+[node name="LabelDay" type="Label" parent="Control/VBoxContainer/StatsHBox"]
+layout_mode = "0"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_font_sizes/font_size = "24"
+text = "Day: 1"
+
+[node name="LabelMoney" type="Label" parent="Control/VBoxContainer/StatsHBox"]
+layout_mode = "0"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_font_sizes/font_size = "24"
+text = "Money: 100"
+
+[node name="LabelSeed" type="Label" parent="Control/VBoxContainer/StatsHBox"]
+layout_mode = "0"
+theme_override_colors/font_color = "#AAAAAA"
+theme_override_font_sizes/font_size = "16"
+text = "Seed: 42"
+
+[node name="Separator2" type="HSeparator" parent="Control/VBoxContainer"]
+
 [node name="ListGladiators" type="Label" parent="Control/VBoxContainer"]
 layout_mode = "0"
 theme_override_colors/font_color = "#FFFFFF"
@@ -59,8 +68,38 @@ theme_override_font_sizes/font_size = "18"
 max_columns = "1"
 autowrap_mode = "1"
 valign = "1"
+text = "Список гладиаторов пуст"
 
-[node name="Separator2" type="HSeparator" parent="Control/VBoxContainer"]
+[node name="Separator3" type="HSeparator" parent="Control/VBoxContainer"]
+
+[node name="HireHBox" type="HBoxContainer" parent="Control/VBoxContainer"]
+layout_mode = "0"
+
+[node name="btnNewGame" type="Button" parent="Control/VBoxContainer/HireHBox"]
+layout_mode = "0"
+text = "New Game"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_colors/background_color = "#4CAF50"
+theme_override_colors/hover_color = "#45a049"
+theme_override_font_sizes/font_size = "18"
+
+[node name="btnHireRandom" type="Button" parent="Control/VBoxContainer/HireHBox"]
+layout_mode = "0"
+text = "Hire Random"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_colors/background_color = "#2196F3"
+theme_override_colors/hover_color = "#1976D2"
+theme_override_font_sizes/font_size = "18"
+
+[node name="btnAdvanceDay" type="Button" parent="Control/VBoxContainer/HireHBox"]
+layout_mode = "0"
+text = "Advance Day"
+theme_override_colors/font_color = "#FFFFFF"
+theme_override_colors/background_color = "#FF9800"
+theme_override_colors/hover_color = "#F57C00"
+theme_override_font_sizes/font_size = "18"
+
+[node name="Separator4" type="HSeparator" parent="Control/VBoxContainer"]
 
 [node name="FightSelectionHBox" type="HBoxContainer" parent="Control/VBoxContainer"]
 layout_mode = "0"
@@ -96,59 +135,18 @@ theme_override_colors/hover_color = "#D32F2F"
 theme_override_font_sizes/font_size = "20"
 theme_override_font_flags/bold = "true"
 
-[node name="FightLogContainer" type="Control" parent="Control/VBoxContainer"]
-layout_mode = "3"
-anchors_preset = "8"
-anchor_left = "0.5"
-anchor_top = "0.5"
-anchor_right = "0.5"
-anchor_bottom = "0.5"
-offset_x = "0.0"
-offset_y = "0.0"
-offset_right = "0.0"
-offset_bottom = "0.0"
-grow_horizontal = "2"
-grow_vertical = "0"
-
-[node name="FightLog" type="Label" parent="Control/VBoxContainer/FightLogContainer"]
+[node name="FightLog" type="Label" parent="Control/VBoxContainer"]
 layout_mode = "0"
 theme_override_colors/font_color = "#FFEB3B"
 theme_override_font_sizes/font_size = "14"
 max_columns = "1"
 autowrap_mode = "2"
 valign = "0"
+text = "Лог боя появится здесь..."
 
 [node name="FightStatus" type="Label" parent="Control/VBoxContainer"]
 layout_mode = "0"
 theme_override_colors/font_color = "#4CAF50"
 theme_override_font_sizes/font_size = "20"
 theme_override_font_flags/bold = "true"
-
-[node name="Separator4" type="HSeparator" parent="Control/VBoxContainer"]
-
-[node name="ButtonsHBox" type="HBoxContainer" parent="Control/VBoxContainer"]
-layout_mode = "0"
-
-[node name="btnNewGame" type="Button" parent="Control/VBoxContainer/ButtonsHBox"]
-layout_mode = "0"
-text = "New Game"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#4CAF50"
-theme_override_colors/hover_color = "#45a049"
-theme_override_font_sizes/font_size = "18"
-
-[node name="btnHireRandom" type="Button" parent="Control/VBoxContainer/ButtonsHBox"]
-layout_mode = "0"
-text = "Hire Random"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#2196F3"
-theme_override_colors/hover_color = "#1976D2"
-theme_override_font_sizes/font_size = "18"
-
-[node name="btnAdvanceDay" type="Button" parent="Control/VBoxContainer/ButtonsHBox"]
-layout_mode = "0"
-text = "Advance Day"
-theme_override_colors/font_color = "#FFFFFF"
-theme_override_colors/background_color = "#FF9800"
-theme_override_colors/hover_color = "#F57C00"
-theme_override_font_sizes/font_size = "18"
+text = ""
