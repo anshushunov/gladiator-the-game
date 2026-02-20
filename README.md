@@ -48,7 +48,7 @@
   - у каждого следующего issue есть цель и "как проверить";
   - `dotnet test` проходит без регрессий.
 
-### [ ] Issue-A: UI Foundation v2
+### [x] Issue-A: UI Foundation v2
 - Goal:
   - сделать более живой и читаемый основной экран (HUD, ростер, бой, события).
 - Changes:
@@ -58,7 +58,7 @@
   2) текущие сценарии MVP (new game, hire, advance day, fight) работают как раньше;
   3) нет регрессии в отображении статуса боя и списка гладиаторов.
 
-### [ ] Issue-B: Asset Pack v1 Integration
+### [x] Issue-B: Asset Pack v1 Integration
 - Goal:
   - добавить первые ассеты для атмосферы и читаемости.
 - Changes:
