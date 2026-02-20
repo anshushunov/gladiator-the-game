@@ -1,4 +1,4 @@
-﻿[gd_scene load_steps=13 format=3 uid="uid://main_scene"]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.cs" id="1a2b3c"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/arena_bg_01.svg" id="2_bg"]
@@ -248,6 +248,32 @@ text = "Tired"
 layout_mode = 2
 size_flags_vertical = 3
 custom_minimum_size = Vector2(420, 300)
+
+[node name="TrainingSection" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LabelSelectedGladiator" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.83, 0.89, 0.95, 1)
+text = "Select a gladiator"
+
+[node name="TrainingRow" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TrainingSelect" type="OptionButton" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection/TrainingRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="btnAssignTraining" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection/TrainingRow"]
+layout_mode = 2
+text = "Assign Training"
+
+[node name="TrainingStatus" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.96, 0.79, 1)
+text = ""
 
 [node name="FightPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/MainGrid"]
 layout_mode = 2
