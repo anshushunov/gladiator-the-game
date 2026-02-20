@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="192" viewBox="0 0 128 192">
+  <!-- Retiarius gladiator — Battle Brothers style: chunky, thick outlines, gritty -->
+  <defs>
+    <linearGradient id="skinGrad2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c49a6c"/>
+      <stop offset="100%" stop-color="#a47a50"/>
+    </linearGradient>
+    <linearGradient id="shoulderGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a0a0a8"/>
+      <stop offset="50%" stop-color="#808088"/>
+      <stop offset="100%" stop-color="#606068"/>
+    </linearGradient>
+    <linearGradient id="tridentGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c0c0c8"/>
+      <stop offset="100%" stop-color="#909098"/>
+    </linearGradient>
+  </defs>
+
+  <!-- === SHADOW on ground === -->
+  <ellipse cx="64" cy="184" rx="38" ry="6" fill="rgba(0,0,0,0.25)"/>
+
+  <!-- === LEGS === -->
+  <!-- Right leg (our left visually — he faces left) -->
+  <rect x="40" y="128" width="17" height="36" rx="3" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="2"/>
+  <!-- Sandal -->
+  <rect x="38" y="162" width="21" height="5" rx="2" fill="#5a3820" stroke="#3a2a1a" stroke-width="1"/>
+  <path d="M37 166 Q39 172 49 172 Q59 172 61 166 L59 166 Q57 170 49 170 Q41 170 39 166 Z" fill="#4a2810" stroke="#3a2a1a" stroke-width="1"/>
+  <line x1="42" y1="155" x2="55" y2="155" stroke="#5a3820" stroke-width="1.5"/>
+  <line x1="43" y1="148" x2="54" y2="148" stroke="#5a3820" stroke-width="1.5"/>
+  <line x1="43" y1="141" x2="54" y2="141" stroke="#5a3820" stroke-width="1.5"/>
+
+  <!-- Left leg -->
+  <rect x="62" y="128" width="17" height="36" rx="3" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="2"/>
+  <!-- Sandal -->
+  <rect x="60" y="162" width="21" height="5" rx="2" fill="#5a3820" stroke="#3a2a1a" stroke-width="1"/>
+  <path d="M59 166 Q61 172 71 172 Q81 172 83 166 L81 166 Q79 170 71 170 Q63 170 61 166 Z" fill="#4a2810" stroke="#3a2a1a" stroke-width="1"/>
+  <line x1="64" y1="155" x2="77" y2="155" stroke="#5a3820" stroke-width="1.5"/>
+  <line x1="65" y1="148" x2="76" y2="148" stroke="#5a3820" stroke-width="1.5"/>
+  <line x1="65" y1="141" x2="76" y2="141" stroke="#5a3820" stroke-width="1.5"/>
+
+  <!-- === LOINCLOTH / SUBLIGACULUM === -->
+  <path d="M36 120 L82 120 L76 140 Q66 148 60 148 Q52 148 44 140 Z" fill="#2a4a6a" stroke="#1a2a3a" stroke-width="1.5"/>
+  <path d="M44 120 L50 138 L56 120" fill="none" stroke="#1a3a5a" stroke-width="1" opacity="0.5"/>
+  <path d="M62 120 L68 138 L74 120" fill="none" stroke="#1a3a5a" stroke-width="1" opacity="0.5"/>
+  <!-- Belt/waist wrap -->
+  <rect x="34" y="116" width="50" height="6" rx="1" fill="#3a5a7a" stroke="#1a2a3a" stroke-width="1"/>
+
+  <!-- === TORSO === -->
+  <!-- Leaner than Murmillo but still chunky -->
+  <path d="M32 70 Q30 74 32 120 L84 120 Q86 74 84 70 Q78 60 60 58 Q42 58 32 70 Z" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="2.5"/>
+  <!-- Chest definition -->
+  <path d="M46 74 Q58 70 70 74" fill="none" stroke="#8a6a44" stroke-width="1.2" opacity="0.5"/>
+  <line x1="58" y1="70" x2="58" y2="92" stroke="#8a6a44" stroke-width="1" opacity="0.35"/>
+  <path d="M40 84 Q48 88 58 86" fill="none" stroke="#8a6a44" stroke-width="1" opacity="0.35"/>
+  <path d="M58 86 Q68 88 76 84" fill="none" stroke="#8a6a44" stroke-width="1" opacity="0.35"/>
+  <!-- Abs -->
+  <rect x="48" y="94" width="8" height="6" rx="1" fill="none" stroke="#8a6a44" stroke-width="0.8" opacity="0.35"/>
+  <rect x="58" y="94" width="8" height="6" rx="1" fill="none" stroke="#8a6a44" stroke-width="0.8" opacity="0.35"/>
+  <rect x="48" y="102" width="8" height="6" rx="1" fill="none" stroke="#8a6a44" stroke-width="0.7" opacity="0.25"/>
+  <rect x="58" y="102" width="8" height="6" rx="1" fill="none" stroke="#8a6a44" stroke-width="0.7" opacity="0.25"/>
+
+  <!-- === GALERUS (shoulder guard — left shoulder) === -->
+  <path d="M16 56 Q12 58 10 68 L10 88 Q12 92 18 92 L24 92 Q28 90 28 86 L28 66 Q26 58 22 56 Z" fill="url(#shoulderGrad)" stroke="#3a2a1a" stroke-width="2"/>
+  <!-- Shoulder guard raised rim -->
+  <path d="M10 56 Q8 54 10 52 L22 52 Q24 54 22 56 Z" fill="#a0a0a8" stroke="#3a2a1a" stroke-width="1.5"/>
+  <!-- Decorative rivets -->
+  <circle cx="14" cy="64" r="1.5" fill="#c8c8d0" stroke="#5a5a5a" stroke-width="0.5"/>
+  <circle cx="22" cy="64" r="1.5" fill="#c8c8d0" stroke="#5a5a5a" stroke-width="0.5"/>
+  <circle cx="14" cy="76" r="1.5" fill="#c8c8d0" stroke="#5a5a5a" stroke-width="0.5"/>
+  <circle cx="22" cy="76" r="1.5" fill="#c8c8d0" stroke="#5a5a5a" stroke-width="0.5"/>
+  <circle cx="14" cy="88" r="1.5" fill="#c8c8d0" stroke="#5a5a5a" stroke-width="0.5"/>
+  <circle cx="22" cy="88" r="1.5" fill="#c8c8d0" stroke="#5a5a5a" stroke-width="0.5"/>
+  <!-- Engraved line -->
+  <line x1="18" y1="58" x2="18" y2="90" stroke="#b0b0b8" stroke-width="1" opacity="0.5"/>
+
+  <!-- === LEFT ARM (trident arm) === -->
+  <path d="M32 70 Q24 76 18 84 L14 90 Q12 94 14 96 L22 96 Q26 92 24 88 L28 82 Q30 78 32 76 Z" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="2"/>
+  <!-- Forearm wraps -->
+  <path d="M16 90 Q18 86 22 84" fill="none" stroke="#c8b898" stroke-width="2.5"/>
+  <path d="M14 94 Q16 90 20 88" fill="none" stroke="#c8b898" stroke-width="2.5"/>
+  <!-- Hand gripping trident -->
+  <ellipse cx="10" cy="96" rx="5" ry="4" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="1.5"/>
+
+  <!-- === TRIDENT === -->
+  <!-- Shaft -->
+  <rect x="7" y="20" width="5" height="80" rx="1.5" fill="#6a5030" stroke="#3a2a1a" stroke-width="1.5"/>
+  <!-- Shaft wrapping -->
+  <line x1="7" y1="70" x2="12" y2="68" stroke="#8a7050" stroke-width="1.5"/>
+  <line x1="7" y1="62" x2="12" y2="60" stroke="#8a7050" stroke-width="1.5"/>
+  <line x1="7" y1="54" x2="12" y2="52" stroke="#8a7050" stroke-width="1.5"/>
+  <!-- Center prong -->
+  <polygon points="7.5,20 11.5,20 10.5,4 8.5,4" fill="url(#tridentGrad)" stroke="#3a3a3a" stroke-width="1"/>
+  <!-- Left prong -->
+  <polygon points="4,22 8,22 5,6 1,8" fill="url(#tridentGrad)" stroke="#3a3a3a" stroke-width="1"/>
+  <path d="M1,8 Q0,10 2,12" fill="none" stroke="#3a3a3a" stroke-width="0.8"/>
+  <!-- Right prong -->
+  <polygon points="11,22 15,22 14,6 18,8" fill="url(#tridentGrad)" stroke="#3a3a3a" stroke-width="1"/>
+  <path d="M18,8 Q19,10 17,12" fill="none" stroke="#3a3a3a" stroke-width="0.8"/>
+  <!-- Prong edge highlights -->
+  <line x1="9.5" y1="6" x2="9.5" y2="20" stroke="#d8d8e0" stroke-width="0.5" opacity="0.5"/>
+  <!-- Cross guard -->
+  <rect x="4" y="20" width="12" height="3" rx="1" fill="#a0a0a8" stroke="#3a3a3a" stroke-width="1"/>
+
+  <!-- === RIGHT ARM (net arm) === -->
+  <path d="M84 70 Q92 74 98 82 L102 86 Q100 92 96 96 L90 90 Q92 82 86 76 Z" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="2"/>
+  <!-- Forearm wraps -->
+  <path d="M90 74 Q94 76 97 80" fill="none" stroke="#c8b898" stroke-width="2.5"/>
+  <path d="M90 78 Q94 80 96 84" fill="none" stroke="#c8b898" stroke-width="2.5"/>
+  <!-- Hand -->
+  <ellipse cx="100" cy="88" rx="5" ry="4" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="1.5"/>
+
+  <!-- === NET (rete) === -->
+  <!-- Net gathered in hand, trailing down -->
+  <path d="M100 84 Q110 78 118 72 Q124 78 120 86 Q118 92 112 96 Q106 98 102 92 Z" fill="none" stroke="#c8a858" stroke-width="1.5" opacity="0.8"/>
+  <!-- Net mesh lines -->
+  <line x1="102" y1="86" x2="118" y2="74" stroke="#c8a858" stroke-width="1" opacity="0.6"/>
+  <line x1="104" y1="92" x2="120" y2="82" stroke="#c8a858" stroke-width="1" opacity="0.6"/>
+  <line x1="100" y1="88" x2="114" y2="96" stroke="#c8a858" stroke-width="1" opacity="0.6"/>
+  <line x1="108" y1="74" x2="108" y2="96" stroke="#c8a858" stroke-width="1" opacity="0.6"/>
+  <line x1="114" y1="72" x2="114" y2="92" stroke="#c8a858" stroke-width="1" opacity="0.6"/>
+  <!-- Net weights -->
+  <circle cx="118" cy="72" r="2.5" fill="#a08838" stroke="#3a2a1a" stroke-width="1"/>
+  <circle cx="122" cy="84" r="2.5" fill="#a08838" stroke="#3a2a1a" stroke-width="1"/>
+  <circle cx="112" cy="96" r="2.5" fill="#a08838" stroke="#3a2a1a" stroke-width="1"/>
+  <!-- Trailing net ropes -->
+  <path d="M112 96 Q108 104 104 108" stroke="#c8a858" stroke-width="1" opacity="0.5" fill="none"/>
+  <path d="M122 84 Q120 94 116 100" stroke="#c8a858" stroke-width="1" opacity="0.4" fill="none"/>
+
+  <!-- === HEAD === -->
+  <!-- Neck — thicker, fighter build -->
+  <rect x="50" y="52" width="16" height="10" rx="2" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="1.5"/>
+
+  <!-- Head shape — round BB style -->
+  <ellipse cx="58" cy="36" rx="17" ry="19" fill="url(#skinGrad2)" stroke="#3a2a1a" stroke-width="2.5"/>
+
+  <!-- === FACE (no full helmet — retiarius fights mostly bare-headed) === -->
+  <!-- Hair — short, messy -->
+  <path d="M42 28 Q40 18 46 14 Q52 10 58 10 Q64 10 70 14 Q76 18 74 28" fill="#3a2a1a" stroke="#2a1a0a" stroke-width="1.5"/>
+  <path d="M44 24 Q42 16 48 13 Q54 10 60 12 Q66 10 72 14 Q76 20 72 26" fill="#4a3020" stroke="none"/>
+  <!-- Hair texture -->
+  <path d="M46 20 Q48 14 52 12" fill="none" stroke="#5a3a20" stroke-width="1" opacity="0.5"/>
+  <path d="M62 14 Q66 12 70 16" fill="none" stroke="#5a3a20" stroke-width="1" opacity="0.5"/>
+
+  <!-- Brow ridge — heavy, BB style -->
+  <path d="M44 30 Q50 28 54 30" fill="none" stroke="#8a6a44" stroke-width="2"/>
+  <path d="M62 30 Q66 28 72 30" fill="none" stroke="#8a6a44" stroke-width="2"/>
+
+  <!-- Eyes — intense, small BB style -->
+  <ellipse cx="50" cy="34" rx="3.5" ry="2.5" fill="#e8e0d0"/>
+  <circle cx="51" cy="34" r="1.8" fill="#3a4a2a"/>
+  <circle cx="51.5" cy="33.5" r="0.8" fill="#1a1a1a"/>
+  <ellipse cx="66" cy="34" rx="3.5" ry="2.5" fill="#e8e0d0"/>
+  <circle cx="65" cy="34" r="1.8" fill="#3a4a2a"/>
+  <circle cx="65.5" cy="33.5" r="0.8" fill="#1a1a1a"/>
+  <!-- Eye highlights -->
+  <circle cx="52" cy="33" r="0.5" fill="white" opacity="0.7"/>
+  <circle cx="66" cy="33" r="0.5" fill="white" opacity="0.7"/>
+
+  <!-- Nose — strong, angular BB style -->
+  <path d="M56 34 L54 42 Q56 44 58 44 Q60 44 62 42 L60 34" fill="none" stroke="#8a6a44" stroke-width="1.2"/>
+  <path d="M54 42 Q56 43 58 43 Q60 43 62 42" fill="url(#skinGrad2)" stroke="#8a6a44" stroke-width="0.8" opacity="0.6"/>
+
+  <!-- Mouth — grim expression -->
+  <path d="M50 48 Q54 46 58 48 Q62 46 66 48" fill="none" stroke="#6a4a34" stroke-width="1.5"/>
+
+  <!-- Jaw / chin -->
+  <path d="M44 44 Q48 54 58 54 Q68 54 72 44" fill="none" stroke="#8a6a44" stroke-width="1" opacity="0.4"/>
+
+  <!-- Stubble -->
+  <circle cx="50" cy="50" r="0.5" fill="#4a3020" opacity="0.4"/>
+  <circle cx="54" cy="52" r="0.5" fill="#4a3020" opacity="0.4"/>
+  <circle cx="58" cy="50" r="0.5" fill="#4a3020" opacity="0.4"/>
+  <circle cx="62" cy="52" r="0.5" fill="#4a3020" opacity="0.4"/>
+  <circle cx="66" cy="50" r="0.5" fill="#4a3020" opacity="0.4"/>
+  <circle cx="52" cy="48" r="0.4" fill="#4a3020" opacity="0.3"/>
+  <circle cx="56" cy="48" r="0.4" fill="#4a3020" opacity="0.3"/>
+  <circle cx="60" cy="48" r="0.4" fill="#4a3020" opacity="0.3"/>
+  <circle cx="64" cy="48" r="0.4" fill="#4a3020" opacity="0.3"/>
+
+  <!-- === BATTLE SCARS === -->
+  <!-- Scar across chest -->
+  <line x1="40" y1="76" x2="52" y2="86" stroke="#9a7054" stroke-width="1.5" opacity="0.5"/>
+  <!-- Scar on left cheek -->
+  <line x1="46" y1="38" x2="44" y2="44" stroke="#9a7054" stroke-width="1" opacity="0.5"/>
+  <!-- Scar on right arm -->
+  <line x1="90" y1="76" x2="94" y2="82" stroke="#9a7054" stroke-width="1" opacity="0.4"/>
+
+  <!-- === HEADBAND (optional — some retiarii wore them) === -->
+  <rect x="41" y="26" width="34" height="3" rx="1" fill="#2a4a6a" stroke="#1a2a3a" stroke-width="0.8"/>
+  <rect x="72" y="24" width="6" height="8" rx="1" fill="#2a4a6a" stroke="#1a2a3a" stroke-width="0.8"/>
+</svg>

@@ -15,6 +15,7 @@ public partial class Main : CanvasLayer
 	private const string HireSfxPath = "res://assets/sfx/hire.wav";
 	private const string AdvanceDaySfxPath = "res://assets/sfx/advance_day.wav";
 	private const string FightSfxPath = "res://assets/sfx/fight.wav";
+	private const string FightScenePath = "res://scenes/fight/FightScene.tscn";
 
 	private LudusState _state = LudusState.Empty;
 
@@ -176,11 +177,33 @@ public partial class Main : CanvasLayer
 			return;
 		}
 
+		// Capture pre-fight state before resolving
+		var preFightFirst = _state.GetGladiator(_firstFighterId.Value);
+		var preFightSecond = _state.GetGladiator(_secondFighterId.Value);
+
 		var (updatedState, result) = _state.ResolveFight(_firstFighterId.Value, _secondFighterId.Value);
 		_state = updatedState;
 		_firstFighterId = null;
 		_secondFighterId = null;
 
+		// Try to launch visual fight scene
+		var scene = TryLoad<PackedScene>(FightScenePath);
+		if (scene is not null)
+		{
+			var fightScene = scene.Instantiate<FightScene>();
+			AddChild(fightScene);
+			_root!.Visible = false;
+			fightScene.FightFinished += () =>
+			{
+				fightScene.QueueFree();
+				_root!.Visible = true;
+				UpdateUI();
+			};
+			fightScene.Initialize(result, preFightFirst, preFightSecond);
+			return;
+		}
+
+		// Fallback: text log
 		TryPlay(_sfxFight);
 		_fightLog!.Text = result.Log.ToString();
 		_fightLog.ScrollToLine(0);
