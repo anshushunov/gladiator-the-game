@@ -15,3 +15,13 @@ TestResults/
 *.user
 *.suo
 *.userkeys
+
+## Godot editor cache
+game/.godot/
+
+## Godot auto-generated import metadata
+*.import
+*.uid
+
+## Claude Code local settings
+.claude/
