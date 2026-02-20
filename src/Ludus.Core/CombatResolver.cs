@@ -6,13 +6,20 @@ namespace Ludus.Core;
 public sealed class CombatResolver
 {
     public CombatModel Model { get; }
+    public ConditionModel ConditionModel { get; }
 
-    public static CombatResolver Default { get; } = new(CombatModel.Default);
+    public static CombatResolver Default { get; } = new(CombatModel.Default, ConditionModel.Default);
 
-    public CombatResolver(CombatModel model)
+    public CombatResolver(CombatModel model) : this(model, ConditionModel.Default)
+    {
+    }
+
+    public CombatResolver(CombatModel model, ConditionModel conditionModel)
     {
         model.Validate();
+        conditionModel.Validate();
         Model = model;
+        ConditionModel = conditionModel;
     }
 
     public double GetHitChance(Gladiator attacker, Gladiator defender)
@@ -99,7 +106,8 @@ public sealed class CombatResolver
         var baseDamage = attacker.Stats.Strength * 2;
         var varianceRoll = rng.NextDouble();
         var varianceMultiplier = Model.DamageVarianceMin + (varianceRoll * (Model.DamageVarianceMax - Model.DamageVarianceMin));
-        var modifiedDamage = (int)Math.Round(baseDamage * varianceMultiplier);
+        double efficiency = ConditionResolver.GetEfficiency(attacker.Morale, attacker.Fatigue, ConditionModel);
+        var modifiedDamage = (int)Math.Round(baseDamage * varianceMultiplier * efficiency);
         var defense = GetDefense(defender);
         var reducedDamage = modifiedDamage - defense;
         return Math.Max(Model.MinDamageAfterDefense, reducedDamage);

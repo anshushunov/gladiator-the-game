@@ -195,7 +195,7 @@ public partial record LudusState
     /// </summary>
     public LudusState AdvanceDay()
     {
-        return AdvanceDay(TrainingModel.Default);
+        return AdvanceDay(TrainingModel.Default, ConditionModel.Default);
     }
 
     /// <summary>
@@ -203,7 +203,16 @@ public partial record LudusState
     /// </summary>
     public LudusState AdvanceDay(TrainingModel trainingModel)
     {
+        return AdvanceDay(trainingModel, ConditionModel.Default);
+    }
+
+    /// <summary>
+    /// Переходит к следующему дню с указанными моделями тренировок и состояния.
+    /// </summary>
+    public LudusState AdvanceDay(TrainingModel trainingModel, ConditionModel conditionModel)
+    {
         trainingModel.Validate();
+        conditionModel.Validate();
 
         // Списываем содержание: DailyUpkeepPerGladiator * Gladiators.Count
         int upkeep = DailyUpkeepPerGladiator * Gladiators.Count;
@@ -226,11 +235,15 @@ public partial record LudusState
                 g = g.RestoreHealth(healAmount);
             }
 
+            // Дневной тик морали/усталости
+            g = ConditionResolver.ApplyDailyTick(g, conditionModel);
+
             // Тренировки (пропускаются для травмированных — у них тренировка уже снята)
             if (g.CurrentTraining.HasValue && !g.IsInjured)
             {
                 double roll = rng.NextDouble();
-                if (roll < trainingModel.StatGainChance)
+                double efficiency = ConditionResolver.GetEfficiency(g.Morale, g.Fatigue, conditionModel);
+                if (roll < trainingModel.StatGainChance * efficiency)
                 {
                     g = g.ApplyStatGain(g.CurrentTraining.Value);
                 }
@@ -273,6 +286,17 @@ public partial record LudusState
         var loser = InjuryResolver.ResolveInjury(result.Loser,
             result.Loser.Id == first.Id ? firstMaxHealth : secondMaxHealth,
             isWinner: false, rng, injuryModel);
+
+        // Применяем эффекты морали/усталости от боя
+        var conditionModel = ConditionModel.Default;
+        winner = ConditionResolver.ApplyFightOutcome(winner, true, conditionModel);
+        loser = ConditionResolver.ApplyFightOutcome(loser, false, conditionModel);
+
+        // Штраф морали за травму
+        if (winner.IsInjured)
+            winner = ConditionResolver.ApplyInjuryMoralePenalty(winner, conditionModel);
+        if (loser.IsInjured)
+            loser = ConditionResolver.ApplyInjuryMoralePenalty(loser, conditionModel);
 
         // Если получил травму — снять тренировку
         if (winner.IsInjured && winner.CurrentTraining.HasValue)
