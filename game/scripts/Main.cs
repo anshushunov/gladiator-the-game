@@ -288,9 +288,11 @@ public partial class Main : CanvasLayer
 			{
 				var stateText = !g.IsAlive
 					? "OUT"
-					: g.CurrentTraining.HasValue
-						? $"TRN:{TrainingAbbrev(g.CurrentTraining.Value)}"
-						: "FIT";
+					: g.IsInjured
+						? $"INJ:{g.CurrentInjury!.Value.RecoveryDaysLeft}d"
+						: g.CurrentTraining.HasValue
+							? $"TRN:{TrainingAbbrev(g.CurrentTraining.Value)}"
+							: "FIT";
 				var row = $"{g.Name} [{stateText}]  HP {g.Health}/{g.MaxHealth}  STR {g.Stats.Strength}  AGI {g.Stats.Agility}  STA {g.Stats.Stamina}";
 				_listGladiators.AddItem(row, _portraitTexture);
 			}
@@ -314,7 +316,7 @@ public partial class Main : CanvasLayer
 
 	private void SyncSelectionWithAliveRoster()
 	{
-		_aliveForSelection = _state.AliveGladiators.ToList();
+		_aliveForSelection = _state.Gladiators.Where(g => g.CanFight).ToList();
 
 		if (_selectedGladiatorId.HasValue && !_state.Gladiators.Any(g => g.Id == _selectedGladiatorId.Value))
 		{
@@ -414,6 +416,17 @@ public partial class Main : CanvasLayer
 
 		_labelSelectedGladiator!.Text = $"{gladiator.Name}  STR {gladiator.Stats.Strength}  AGI {gladiator.Stats.Agility}  STA {gladiator.Stats.Stamina}";
 
+		if (gladiator.IsInjured)
+		{
+			_trainingSelect.Disabled = true;
+			_trainingSelect.Select(0);
+			_trainingStatus!.Text = $"Injured: {gladiator.CurrentInjury!.Value.Type} ({gladiator.CurrentInjury!.Value.RecoveryDaysLeft}d left)";
+			_btnAssignTraining!.Disabled = true;
+			return;
+		}
+
+		_trainingSelect.Disabled = false;
+
 		if (gladiator.CurrentTraining.HasValue)
 		{
 			var idx = gladiator.CurrentTraining.Value switch
@@ -432,7 +445,7 @@ public partial class Main : CanvasLayer
 			_trainingStatus!.Text = "";
 		}
 
-		_btnAssignTraining!.Disabled = !gladiator.IsAlive;
+		_btnAssignTraining!.Disabled = !gladiator.IsAlive || gladiator.IsInjured;
 	}
 
 	private static string TrainingAbbrev(TrainingType type) => type switch

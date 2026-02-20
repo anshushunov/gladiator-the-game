@@ -68,7 +68,7 @@
   2) нет битых путей/ресурсов в Godot;
   3) визуал не ломает существующие UI-сценарии.
 
-### [ ] Issue-C: Training System v1 (Core-first)
+### [x] Issue-C: Training System v1 (Core-first)
 - Goal:
   - добавить назначение тренировок и применение эффектов на дневном тике.
 - Changes:

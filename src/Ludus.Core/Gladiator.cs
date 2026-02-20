@@ -37,15 +37,30 @@ public readonly struct Gladiator
     public TrainingType? CurrentTraining { get; }
 
     /// <summary>
+    /// Текущая травма (null = здоров).
+    /// </summary>
+    public Injury? CurrentInjury { get; }
+
+    /// <summary>
     /// Жив ли гладиатор.
     /// </summary>
     public bool IsAlive => Health > 0;
+
+    /// <summary>
+    /// Есть ли травма.
+    /// </summary>
+    public bool IsInjured => CurrentInjury.HasValue;
+
+    /// <summary>
+    /// Может ли участвовать в бою (жив и не травмирован).
+    /// </summary>
+    public bool CanFight => IsAlive && !IsInjured;
 
     private const int MinNameLength = 1;
     private const int MaxNameLength = 50;
 
     public Gladiator(Guid id, string name, Stats stats, int health, int maxHealth,
-        TrainingType? currentTraining = null)
+        TrainingType? currentTraining = null, Injury? currentInjury = null)
     {
         if (string.IsNullOrWhiteSpace(name) || name.Length < MinNameLength || name.Length > MaxNameLength)
             throw new ValidationException(
@@ -61,6 +76,7 @@ public readonly struct Gladiator
         Health = health;
         MaxHealth = maxHealth;
         CurrentTraining = currentTraining;
+        CurrentInjury = currentInjury;
     }
 
     /// <summary>
@@ -86,7 +102,7 @@ public readonly struct Gladiator
             throw new InvalidOperationException("Мёртвый гладиатор не может получать урон");
 
         int newHealth = Math.Max(0, Health - damage);
-        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining);
+        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining, CurrentInjury);
     }
 
     /// <summary>
@@ -100,23 +116,26 @@ public readonly struct Gladiator
             throw new InvalidOperationException("Мёртвый гладиатор не может восстанавливать здоровье");
 
         int newHealth = Math.Min(MaxHealth, Health + amount);
-        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining);
+        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining, CurrentInjury);
     }
 
     /// <summary>
-    /// Назначает тренировку гладиатору. Гладиатор должен быть жив, стат не должен быть на максимуме.
+    /// Назначает тренировку гладиатору. Гладиатор должен быть жив, не травмирован, стат не на максимуме.
     /// </summary>
     public Gladiator AssignTraining(TrainingType type)
     {
         if (!IsAlive)
             throw new InvalidOperationException("Мёртвый гладиатор не может тренироваться");
 
+        if (IsInjured)
+            throw new InvalidOperationException("Травмированный гладиатор не может тренироваться");
+
         int currentStatValue = GetStatValue(type);
         if (currentStatValue >= 10)
             throw new InvalidOperationException(
                 $"Стат {type} уже на максимуме (10), тренировка невозможна");
 
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, type);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, type, CurrentInjury);
     }
 
     /// <summary>
@@ -124,7 +143,30 @@ public readonly struct Gladiator
     /// </summary>
     public Gladiator ClearTraining()
     {
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, null);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, null, CurrentInjury);
+    }
+
+    /// <summary>
+    /// Применяет травму гладиатору. Гладиатор должен быть жив.
+    /// </summary>
+    public Gladiator ApplyInjury(Injury injury)
+    {
+        if (!IsAlive)
+            throw new InvalidOperationException("Мёртвый гладиатор не может получить травму");
+
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, injury);
+    }
+
+    /// <summary>
+    /// Уменьшает оставшиеся дни восстановления. Снимает травму если дни закончились.
+    /// </summary>
+    public Gladiator TickRecovery()
+    {
+        if (!CurrentInjury.HasValue)
+            return this;
+
+        var tickedInjury = CurrentInjury.Value.Tick();
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, tickedInjury);
     }
 
     /// <summary>
@@ -160,7 +202,7 @@ public readonly struct Gladiator
 
         TrainingType? newTraining = newStatValue >= 10 ? null : CurrentTraining;
 
-        return new Gladiator(Id, Name, newStats, newHealth, newMaxHealth, newTraining);
+        return new Gladiator(Id, Name, newStats, newHealth, newMaxHealth, newTraining, CurrentInjury);
     }
 
     private int GetStatValue(TrainingType type) => type switch
@@ -174,7 +216,8 @@ public readonly struct Gladiator
     public override string ToString()
     {
         string training = CurrentTraining.HasValue ? $", Training={CurrentTraining.Value}" : "";
-        return $"Gladiator {{ Id={Id}, Name={Name}, Health={Health}/{MaxHealth}, Stats={Stats}{training} }}";
+        string injury = CurrentInjury.HasValue ? $", Injury={CurrentInjury.Value.Type}({CurrentInjury.Value.RecoveryDaysLeft}d)" : "";
+        return $"Gladiator {{ Id={Id}, Name={Name}, Health={Health}/{MaxHealth}, Stats={Stats}{training}{injury} }}";
     }
 
     public override bool Equals(object? obj)
@@ -185,11 +228,12 @@ public readonly struct Gladiator
                Stats.Equals(other.Stats) &&
                Health == other.Health &&
                MaxHealth == other.MaxHealth &&
-               CurrentTraining == other.CurrentTraining;
+               CurrentTraining == other.CurrentTraining &&
+               CurrentInjury == other.CurrentInjury;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id, Name, Stats, Health, MaxHealth, CurrentTraining);
+        return HashCode.Combine(Id, Name, Stats, Health, MaxHealth, CurrentTraining, CurrentInjury);
     }
 }

@@ -209,17 +209,31 @@ public partial record LudusState
         int upkeep = DailyUpkeepPerGladiator * Gladiators.Count;
         int newMoney = Money - upkeep;
 
-        // Обрабатываем тренировки через RNG
         var rng = CreateRng();
         var updatedGladiators = Gladiators.Select(g =>
         {
-            if (!g.IsAlive || !g.CurrentTraining.HasValue)
+            if (!g.IsAlive)
                 return g;
 
-            double roll = rng.NextDouble();
-            if (roll < trainingModel.StatGainChance)
+            // Восстановление травм (перед тренировками)
+            if (g.IsInjured)
+                g = g.TickRecovery();
+
+            // Восстановление HP живым бойцам
+            if (g.Health < g.MaxHealth)
             {
-                return g.ApplyStatGain(g.CurrentTraining.Value);
+                int healAmount = Math.Max(1, (int)(g.MaxHealth * 0.1));
+                g = g.RestoreHealth(healAmount);
+            }
+
+            // Тренировки (пропускаются для травмированных — у них тренировка уже снята)
+            if (g.CurrentTraining.HasValue && !g.IsInjured)
+            {
+                double roll = rng.NextDouble();
+                if (roll < trainingModel.StatGainChance)
+                {
+                    g = g.ApplyStatGain(g.CurrentTraining.Value);
+                }
             }
 
             return g;
@@ -241,17 +255,36 @@ public partial record LudusState
         var first = GetGladiator(firstGladiatorId);
         var second = GetGladiator(secondGladiatorId);
 
-        if (!first.IsAlive || !second.IsAlive)
-            throw new ValidationException("В бою могут участвовать только живые гладиаторы");
+        if (!first.CanFight || !second.CanFight)
+            throw new ValidationException("В бою могут участвовать только боеспособные гладиаторы (живые и без травм)");
+
+        // Запоминаем MaxHealth до боя для расчёта травм
+        int firstMaxHealth = first.MaxHealth;
+        int secondMaxHealth = second.MaxHealth;
 
         var rng = CreateRng();
         var result = FightEngine.SimulateFight(first, second, rng);
 
+        // Применяем травмы обоим участникам
+        var injuryModel = InjuryModel.Default;
+        var winner = InjuryResolver.ResolveInjury(result.Winner,
+            result.Winner.Id == first.Id ? firstMaxHealth : secondMaxHealth,
+            isWinner: true, rng, injuryModel);
+        var loser = InjuryResolver.ResolveInjury(result.Loser,
+            result.Loser.Id == first.Id ? firstMaxHealth : secondMaxHealth,
+            isWinner: false, rng, injuryModel);
+
+        // Если получил травму — снять тренировку
+        if (winner.IsInjured && winner.CurrentTraining.HasValue)
+            winner = winner.ClearTraining();
+        if (loser.IsInjured && loser.CurrentTraining.HasValue)
+            loser = loser.ClearTraining();
+
         var updatedGladiators = Gladiators
             .Select(g =>
             {
-                if (g.Id == result.Winner.Id) return result.Winner;
-                if (g.Id == result.Loser.Id) return result.Loser;
+                if (g.Id == winner.Id) return winner;
+                if (g.Id == loser.Id) return loser;
                 return g;
             })
             .ToArray();
