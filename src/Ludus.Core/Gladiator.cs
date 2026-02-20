@@ -32,6 +32,11 @@ public readonly struct Gladiator
     public int MaxHealth { get; }
 
     /// <summary>
+    /// Текущая назначенная тренировка (null = нет тренировки).
+    /// </summary>
+    public TrainingType? CurrentTraining { get; }
+
+    /// <summary>
     /// Жив ли гладиатор.
     /// </summary>
     public bool IsAlive => Health > 0;
@@ -39,7 +44,8 @@ public readonly struct Gladiator
     private const int MinNameLength = 1;
     private const int MaxNameLength = 50;
 
-    public Gladiator(Guid id, string name, Stats stats, int health, int maxHealth)
+    public Gladiator(Guid id, string name, Stats stats, int health, int maxHealth,
+        TrainingType? currentTraining = null)
     {
         if (string.IsNullOrWhiteSpace(name) || name.Length < MinNameLength || name.Length > MaxNameLength)
             throw new ValidationException(
@@ -54,6 +60,7 @@ public readonly struct Gladiator
         Stats = stats;
         Health = health;
         MaxHealth = maxHealth;
+        CurrentTraining = currentTraining;
     }
 
     /// <summary>
@@ -79,7 +86,7 @@ public readonly struct Gladiator
             throw new InvalidOperationException("Мёртвый гладиатор не может получать урон");
 
         int newHealth = Math.Max(0, Health - damage);
-        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth);
+        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining);
     }
 
     /// <summary>
@@ -93,12 +100,81 @@ public readonly struct Gladiator
             throw new InvalidOperationException("Мёртвый гладиатор не может восстанавливать здоровье");
 
         int newHealth = Math.Min(MaxHealth, Health + amount);
-        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth);
+        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining);
     }
+
+    /// <summary>
+    /// Назначает тренировку гладиатору. Гладиатор должен быть жив, стат не должен быть на максимуме.
+    /// </summary>
+    public Gladiator AssignTraining(TrainingType type)
+    {
+        if (!IsAlive)
+            throw new InvalidOperationException("Мёртвый гладиатор не может тренироваться");
+
+        int currentStatValue = GetStatValue(type);
+        if (currentStatValue >= 10)
+            throw new InvalidOperationException(
+                $"Стат {type} уже на максимуме (10), тренировка невозможна");
+
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, type);
+    }
+
+    /// <summary>
+    /// Снимает текущую тренировку.
+    /// </summary>
+    public Gladiator ClearTraining()
+    {
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, null);
+    }
+
+    /// <summary>
+    /// Применяет прирост стата от тренировки. Если стат достигает 10 — тренировка автоматически снимается.
+    /// При росте Stamina: MaxHealth и Health увеличиваются на 10.
+    /// </summary>
+    public Gladiator ApplyStatGain(TrainingType type)
+    {
+        var newStats = type switch
+        {
+            TrainingType.Strength => Stats with { Strength = Stats.Strength + 1 },
+            TrainingType.Agility => Stats with { Agility = Stats.Agility + 1 },
+            TrainingType.Stamina => Stats with { Stamina = Stats.Stamina + 1 },
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
+
+        int newMaxHealth = MaxHealth;
+        int newHealth = Health;
+
+        if (type == TrainingType.Stamina)
+        {
+            newMaxHealth += 10;
+            newHealth += 10;
+        }
+
+        int newStatValue = type switch
+        {
+            TrainingType.Strength => newStats.Strength,
+            TrainingType.Agility => newStats.Agility,
+            TrainingType.Stamina => newStats.Stamina,
+            _ => 0
+        };
+
+        TrainingType? newTraining = newStatValue >= 10 ? null : CurrentTraining;
+
+        return new Gladiator(Id, Name, newStats, newHealth, newMaxHealth, newTraining);
+    }
+
+    private int GetStatValue(TrainingType type) => type switch
+    {
+        TrainingType.Strength => Stats.Strength,
+        TrainingType.Agility => Stats.Agility,
+        TrainingType.Stamina => Stats.Stamina,
+        _ => throw new ArgumentOutOfRangeException(nameof(type))
+    };
 
     public override string ToString()
     {
-        return $"Gladiator {{ Id={Id}, Name={Name}, Health={Health}/{MaxHealth}, Stats={Stats} }}";
+        string training = CurrentTraining.HasValue ? $", Training={CurrentTraining.Value}" : "";
+        return $"Gladiator {{ Id={Id}, Name={Name}, Health={Health}/{MaxHealth}, Stats={Stats}{training} }}";
     }
 
     public override bool Equals(object? obj)
@@ -108,11 +184,12 @@ public readonly struct Gladiator
                Name == other.Name &&
                Stats.Equals(other.Stats) &&
                Health == other.Health &&
-               MaxHealth == other.MaxHealth;
+               MaxHealth == other.MaxHealth &&
+               CurrentTraining == other.CurrentTraining;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id, Name, Stats, Health, MaxHealth);
+        return HashCode.Combine(Id, Name, Stats, Health, MaxHealth, CurrentTraining);
     }
 }

@@ -37,6 +37,12 @@ public partial class Main : CanvasLayer
 	private AudioStreamPlayer? _sfxFight;
 	private Texture2D? _portraitTexture;
 
+	private Label? _labelSelectedGladiator;
+	private OptionButton? _trainingSelect;
+	private Button? _btnAssignTraining;
+	private Label? _trainingStatus;
+
+	private Guid? _selectedGladiatorId;
 	private Guid? _firstFighterId;
 	private Guid? _secondFighterId;
 	private List<Gladiator> _aliveForSelection = [];
@@ -49,6 +55,11 @@ public partial class Main : CanvasLayer
 		_labelMoney = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/MoneyPanel/MoneyMargin/MoneyBox/LabelMoney");
 		_labelSeed = GetNode<Label>("Control/MarginContainer/RootVBox/TopStats/SeedPanel/SeedMargin/SeedBox/LabelSeed");
 		_listGladiators = GetNode<ItemList>("Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/ListGladiators");
+		_labelSelectedGladiator = GetNode<Label>("Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection/LabelSelectedGladiator");
+		_trainingSelect = GetNode<OptionButton>("Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection/TrainingRow/TrainingSelect");
+		_btnAssignTraining = GetNode<Button>("Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection/TrainingRow/btnAssignTraining");
+		_trainingStatus = GetNode<Label>("Control/MarginContainer/RootVBox/MainGrid/RosterPanel/RosterVBox/TrainingSection/TrainingStatus");
+
 		_firstFighterSelect = GetNode<OptionButton>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/FirstPicker/FirstFighterSelect");
 		_secondFighterSelect = GetNode<OptionButton>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/FighterSelects/SecondPicker/SecondFighterSelect");
 		_selectionStatus = GetNode<Label>("Control/MarginContainer/RootVBox/MainGrid/FightPanel/FightVBox/SelectionStatus");
@@ -82,6 +93,8 @@ public partial class Main : CanvasLayer
 		btnHireRandom.Pressed += OnHireRandomPressed;
 		btnAdvanceDay.Pressed += OnAdvanceDayPressed;
 		_btnSimulateFight!.Pressed += OnSimulateFightPressed;
+		_listGladiators!.ItemSelected += OnGladiatorSelected;
+		_btnAssignTraining!.Pressed += OnAssignTrainingPressed;
 		_firstFighterSelect!.ItemSelected += OnFirstFighterSelected;
 		_secondFighterSelect!.ItemSelected += OnSecondFighterSelected;
 		_root!.Resized += OnRootResized;
@@ -93,6 +106,7 @@ public partial class Main : CanvasLayer
 	public void OnNewGamePressed()
 	{
 		_state = LudusState.NewGame(LudusState.DefaultSeed);
+		_selectedGladiatorId = null;
 		_firstFighterId = null;
 		_secondFighterId = null;
 		UpdateUI();
@@ -175,6 +189,46 @@ public partial class Main : CanvasLayer
 		UpdateUI();
 	}
 
+	private void OnGladiatorSelected(long index)
+	{
+		if (index < 0 || index >= _state.Gladiators.Count)
+		{
+			_selectedGladiatorId = null;
+			UpdateUI();
+			return;
+		}
+
+		_selectedGladiatorId = _state.Gladiators[(int)index].Id;
+		UpdateUI();
+	}
+
+	private void OnAssignTrainingPressed()
+	{
+		if (!_selectedGladiatorId.HasValue)
+		{
+			return;
+		}
+
+		var selectedIndex = _trainingSelect!.Selected;
+		if (selectedIndex == 0)
+		{
+			_state = _state.ClearTraining(_selectedGladiatorId.Value);
+		}
+		else
+		{
+			var trainingType = selectedIndex switch
+			{
+				1 => TrainingType.Strength,
+				2 => TrainingType.Agility,
+				3 => TrainingType.Stamina,
+				_ => TrainingType.Strength
+			};
+			_state = _state.AssignTraining(_selectedGladiatorId.Value, trainingType);
+		}
+
+		UpdateUI();
+	}
+
 	private void OnRootResized()
 	{
 		UpdateLayoutByWidth();
@@ -209,12 +263,17 @@ public partial class Main : CanvasLayer
 		{
 			foreach (var g in _state.Gladiators)
 			{
-				var stateText = g.IsAlive ? "FIT" : "OUT";
+				var stateText = !g.IsAlive
+					? "OUT"
+					: g.CurrentTraining.HasValue
+						? $"TRN:{TrainingAbbrev(g.CurrentTraining.Value)}"
+						: "FIT";
 				var row = $"{g.Name} [{stateText}]  HP {g.Health}/{g.MaxHealth}  STR {g.Stats.Strength}  AGI {g.Stats.Agility}  STA {g.Stats.Stamina}";
 				_listGladiators.AddItem(row, _portraitTexture);
 			}
 		}
 
+		UpdateTrainingPanel();
 		RebuildFightSelectors();
 
 		var firstText = NameById(_firstFighterId) ?? "not selected";
@@ -233,6 +292,11 @@ public partial class Main : CanvasLayer
 	private void SyncSelectionWithAliveRoster()
 	{
 		_aliveForSelection = _state.AliveGladiators.ToList();
+
+		if (_selectedGladiatorId.HasValue && !_state.Gladiators.Any(g => g.Id == _selectedGladiatorId.Value))
+		{
+			_selectedGladiatorId = null;
+		}
 
 		if (_firstFighterId.HasValue && !_aliveForSelection.Any(g => g.Id == _firstFighterId.Value))
 		{
@@ -296,6 +360,65 @@ public partial class Main : CanvasLayer
 		var fighter = _aliveForSelection.FirstOrDefault(g => g.Id == fighterId.Value);
 		return fighter.Id == Guid.Empty ? null : fighter.Name;
 	}
+
+	private void UpdateTrainingPanel()
+	{
+		_trainingSelect!.Clear();
+		_trainingSelect.AddItem("None");
+		_trainingSelect.AddItem("Strength");
+		_trainingSelect.AddItem("Agility");
+		_trainingSelect.AddItem("Stamina");
+
+		if (!_selectedGladiatorId.HasValue)
+		{
+			_labelSelectedGladiator!.Text = "Select a gladiator";
+			_trainingSelect.Select(0);
+			_trainingStatus!.Text = "";
+			_btnAssignTraining!.Disabled = true;
+			return;
+		}
+
+		var gladiator = _state.Gladiators.FirstOrDefault(g => g.Id == _selectedGladiatorId.Value);
+		if (gladiator.Id == Guid.Empty)
+		{
+			_selectedGladiatorId = null;
+			_labelSelectedGladiator!.Text = "Select a gladiator";
+			_trainingSelect.Select(0);
+			_trainingStatus!.Text = "";
+			_btnAssignTraining!.Disabled = true;
+			return;
+		}
+
+		_labelSelectedGladiator!.Text = $"{gladiator.Name}  STR {gladiator.Stats.Strength}  AGI {gladiator.Stats.Agility}  STA {gladiator.Stats.Stamina}";
+
+		if (gladiator.CurrentTraining.HasValue)
+		{
+			var idx = gladiator.CurrentTraining.Value switch
+			{
+				TrainingType.Strength => 1,
+				TrainingType.Agility => 2,
+				TrainingType.Stamina => 3,
+				_ => 0
+			};
+			_trainingSelect.Select(idx);
+			_trainingStatus!.Text = $"Training: {gladiator.CurrentTraining.Value}";
+		}
+		else
+		{
+			_trainingSelect.Select(0);
+			_trainingStatus!.Text = "";
+		}
+
+		_btnAssignTraining!.Disabled = !gladiator.IsAlive;
+	}
+
+	private static string TrainingAbbrev(TrainingType type) => type switch
+	{
+		TrainingType.Strength => "STR",
+		TrainingType.Agility => "AGI",
+		TrainingType.Stamina => "STA",
+		_ => "???"
+	};
 
 	private static T? TryLoad<T>(string path) where T : Resource
 	{

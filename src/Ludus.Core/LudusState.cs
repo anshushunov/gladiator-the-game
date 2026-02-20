@@ -170,15 +170,63 @@ public partial record LudusState
     }
 
     /// <summary>
-    /// Переходит к следующему дню: увеличивает Day и списывает ежедневное содержание.
+    /// Назначает тренировку гладиатору.
+    /// </summary>
+    public LudusState AssignTraining(Guid gladiatorId, TrainingType type)
+    {
+        var gladiator = GetGladiator(gladiatorId);
+        var updated = gladiator.AssignTraining(type);
+        return ReplaceGladiator(updated);
+    }
+
+    /// <summary>
+    /// Снимает тренировку с гладиатора.
+    /// </summary>
+    public LudusState ClearTraining(Guid gladiatorId)
+    {
+        var gladiator = GetGladiator(gladiatorId);
+        var updated = gladiator.ClearTraining();
+        return ReplaceGladiator(updated);
+    }
+
+    /// <summary>
+    /// Переходит к следующему дню: увеличивает Day, списывает содержание,
+    /// обрабатывает тренировки (детерминированно через RNG).
     /// </summary>
     public LudusState AdvanceDay()
     {
+        return AdvanceDay(TrainingModel.Default);
+    }
+
+    /// <summary>
+    /// Переходит к следующему дню с указанной моделью тренировок.
+    /// </summary>
+    public LudusState AdvanceDay(TrainingModel trainingModel)
+    {
+        trainingModel.Validate();
+
         // Списываем содержание: DailyUpkeepPerGladiator * Gladiators.Count
         int upkeep = DailyUpkeepPerGladiator * Gladiators.Count;
         int newMoney = Money - upkeep;
 
-        return this with { Day = Day + 1, Money = newMoney };
+        // Обрабатываем тренировки через RNG
+        var rng = CreateRng();
+        var updatedGladiators = Gladiators.Select(g =>
+        {
+            if (!g.IsAlive || !g.CurrentTraining.HasValue)
+                return g;
+
+            double roll = rng.NextDouble();
+            if (roll < trainingModel.StatGainChance)
+            {
+                return g.ApplyStatGain(g.CurrentTraining.Value);
+            }
+
+            return g;
+        }).ToArray();
+
+        int newSeed = rng.Next(int.MaxValue);
+        return this with { Day = Day + 1, Money = newMoney, Gladiators = updatedGladiators, Seed = newSeed };
     }
 
     /// <summary>
@@ -253,4 +301,12 @@ public partial record LudusState
     /// Получает список живых гладиаторов.
     /// </summary>
     public IReadOnlyList<Gladiator> AliveGladiators => Gladiators.Where(g => g.IsAlive).ToArray();
+
+    private LudusState ReplaceGladiator(Gladiator updated)
+    {
+        var updatedGladiators = Gladiators
+            .Select(g => g.Id == updated.Id ? updated : g)
+            .ToArray();
+        return this with { Gladiators = updatedGladiators };
+    }
 }
