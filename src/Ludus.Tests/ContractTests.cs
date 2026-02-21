@@ -99,6 +99,11 @@ public class GladiatorContractTests
 
 public class LudusStateContractsTests
 {
+    private static LudusState AdvanceAndResolve(LudusState state)
+    {
+        return state.AdvanceDay().ResolveDailyEvent(DailyEventOptionId.OptionB);
+    }
+
     [Fact]
     public void AdvanceDay_ShouldDeductDailyWages()
     {
@@ -147,9 +152,9 @@ public class LudusStateContractsTests
         var state = LudusState.NewGame(42) with { Money = 0 };
         state = state.AddGladiator(g);
 
-        var day1 = state.AdvanceDay();
-        var day2 = day1.AdvanceDay();
-        var day3 = day2.AdvanceDay();
+        var day1 = AdvanceAndResolve(state);
+        var day2 = AdvanceAndResolve(day1);
+        var day3 = AdvanceAndResolve(day2);
 
         Assert.DoesNotContain(day3.Gladiators, x => x.Id == g.Id);
     }

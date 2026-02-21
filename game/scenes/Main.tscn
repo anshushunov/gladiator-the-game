@@ -178,6 +178,45 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Advance Day"
 
+[node name="DailyEventPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DailyEventVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/DailyEventPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LabelDailyEventTitle" type="Label" parent="Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.83, 0.62, 1)
+theme_override_font_sizes/font_size = 20
+text = "Daily Event"
+
+[node name="LabelDailyEventDescription" type="Label" parent="Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Advance day to trigger an event."
+
+[node name="DailyEventButtons" type="HBoxContainer" parent="Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="btnDailyEventOptionA" type="Button" parent="Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/DailyEventButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Option A"
+
+[node name="btnDailyEventOptionB" type="Button" parent="Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/DailyEventButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Option B"
+
+[node name="LabelDailyEventResult" type="Label" parent="Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.96, 0.79, 1)
+autowrap_mode = 2
+text = ""
+
 [node name="MainGrid" type="GridContainer" parent="Control/MarginContainer/RootVBox"]
 layout_mode = 2
 size_flags_vertical = 3

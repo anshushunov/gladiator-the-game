@@ -36,6 +36,16 @@ public partial record LudusState
     public int Seed { get; init; }
 
     /// <summary>
+    /// Текущее дневное событие, ожидающее выбора игрока.
+    /// </summary>
+    public DailyEventInstance? PendingDailyEvent { get; init; }
+
+    /// <summary>
+    /// Результат последнего применённого дневного события.
+    /// </summary>
+    public DailyEventResolution? LastDailyEventResolution { get; init; }
+
+    /// <summary>
     /// Константа для значения seed по умолчанию.
     /// </summary>
     public const int DefaultSeed = 42;
@@ -210,6 +220,9 @@ public partial record LudusState
     /// </summary>
     public LudusState AdvanceDay(TrainingModel trainingModel, ConditionModel conditionModel)
     {
+        if (PendingDailyEvent.HasValue)
+            throw new ValidationException("Cannot advance day while a daily event is pending");
+
         trainingModel.Validate();
         conditionModel.Validate();
 
@@ -279,14 +292,37 @@ public partial record LudusState
             newActiveId = null;
         }
 
-        int newSeed = rng.Next(int.MaxValue);
-        return this with
+        var baseState = this with
         {
             Day = Day + 1,
             Money = newMoney,
             Gladiators = retainedGladiators,
-            ActiveGladiatorId = newActiveId,
-            Seed = newSeed
+            ActiveGladiatorId = newActiveId
+        };
+
+        var dailyEvent = DailyEventResolver.RollEvent(baseState, rng);
+        int newSeed = rng.Next(int.MaxValue);
+        return baseState with
+        {
+            Seed = newSeed,
+            PendingDailyEvent = dailyEvent,
+            LastDailyEventResolution = null
+        };
+    }
+
+    /// <summary>
+    /// Применяет выбор по текущему дневному событию.
+    /// </summary>
+    public LudusState ResolveDailyEvent(DailyEventOptionId optionId)
+    {
+        if (!PendingDailyEvent.HasValue)
+            throw new ValidationException("No pending daily event to resolve");
+
+        var (stateAfterResolution, resolution) = DailyEventResolver.ApplyChoice(this, PendingDailyEvent.Value, optionId);
+        return stateAfterResolution with
+        {
+            PendingDailyEvent = null,
+            LastDailyEventResolution = resolution
         };
     }
 

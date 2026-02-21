@@ -32,6 +32,7 @@ public partial class Main : CanvasLayer
 	private RichTextLabel? _fightLog;
 	private Label? _fightStatus;
 	private Button? _btnSimulateFight;
+	private Button? _btnAdvanceDay;
 
 	private AudioStreamPlayer? _sfxHire;
 	private AudioStreamPlayer? _sfxAdvanceDay;
@@ -42,6 +43,11 @@ public partial class Main : CanvasLayer
 	private OptionButton? _trainingSelect;
 	private Button? _btnAssignTraining;
 	private Label? _trainingStatus;
+	private Label? _labelDailyEventTitle;
+	private Label? _labelDailyEventDescription;
+	private Label? _labelDailyEventResult;
+	private Button? _btnDailyEventOptionA;
+	private Button? _btnDailyEventOptionB;
 
 	private Guid? _selectedGladiatorId;
 	private Guid? _firstFighterId;
@@ -70,7 +76,12 @@ public partial class Main : CanvasLayer
 
 		var btnNewGame = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnNewGame");
 		var btnHireRandom = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnHireRandom");
-		var btnAdvanceDay = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnAdvanceDay");
+		_btnAdvanceDay = GetNode<Button>("Control/MarginContainer/RootVBox/ActionRow/btnAdvanceDay");
+		_labelDailyEventTitle = GetNode<Label>("Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/LabelDailyEventTitle");
+		_labelDailyEventDescription = GetNode<Label>("Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/LabelDailyEventDescription");
+		_btnDailyEventOptionA = GetNode<Button>("Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/DailyEventButtons/btnDailyEventOptionA");
+		_btnDailyEventOptionB = GetNode<Button>("Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/DailyEventButtons/btnDailyEventOptionB");
+		_labelDailyEventResult = GetNode<Label>("Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/LabelDailyEventResult");
 
 		_sfxHire = GetNode<AudioStreamPlayer>("SfxHire");
 		_sfxAdvanceDay = GetNode<AudioStreamPlayer>("SfxAdvanceDay");
@@ -92,12 +103,14 @@ public partial class Main : CanvasLayer
 
 		btnNewGame.Pressed += OnNewGamePressed;
 		btnHireRandom.Pressed += OnHireRandomPressed;
-		btnAdvanceDay.Pressed += OnAdvanceDayPressed;
+		_btnAdvanceDay.Pressed += OnAdvanceDayPressed;
 		_btnSimulateFight!.Pressed += OnSimulateFightPressed;
 		_listGladiators!.ItemSelected += OnGladiatorSelected;
 		_btnAssignTraining!.Pressed += OnAssignTrainingPressed;
 		_firstFighterSelect!.ItemSelected += OnFirstFighterSelected;
 		_secondFighterSelect!.ItemSelected += OnSecondFighterSelected;
+		_btnDailyEventOptionA!.Pressed += OnDailyEventOptionAPressed;
+		_btnDailyEventOptionB!.Pressed += OnDailyEventOptionBPressed;
 		_root!.Resized += OnRootResized;
 
 		UpdateLayoutByWidth();
@@ -124,6 +137,18 @@ public partial class Main : CanvasLayer
 	{
 		_state = _state.AdvanceDay();
 		TryPlay(_sfxAdvanceDay);
+		UpdateUI();
+	}
+
+	public void OnDailyEventOptionAPressed()
+	{
+		_state = _state.ResolveDailyEvent(DailyEventOptionId.OptionA);
+		UpdateUI();
+	}
+
+	public void OnDailyEventOptionBPressed()
+	{
+		_state = _state.ResolveDailyEvent(DailyEventOptionId.OptionB);
 		UpdateUI();
 	}
 
@@ -276,6 +301,7 @@ public partial class Main : CanvasLayer
 		_labelDay!.Text = $"Day {_state.Day}";
 		_labelMoney!.Text = $"Money {_state.Money}";
 		_labelSeed!.Text = $"Seed {_state.Seed}";
+		_btnAdvanceDay!.Disabled = _state.PendingDailyEvent.HasValue;
 
 		_listGladiators!.Clear();
 		if (_state.Gladiators.Count == 0)
@@ -300,6 +326,7 @@ public partial class Main : CanvasLayer
 
 		UpdateTrainingPanel();
 		RebuildFightSelectors();
+		UpdateDailyEventPanel();
 
 		var firstText = NameById(_firstFighterId) ?? "not selected";
 		var secondText = NameById(_secondFighterId) ?? "not selected";
@@ -313,6 +340,75 @@ public partial class Main : CanvasLayer
 			_fightStatus!.Text = "Need at least two alive gladiators.";
 		}
 	}
+
+	private void UpdateDailyEventPanel()
+	{
+		var pending = _state.PendingDailyEvent;
+		var lastResolution = _state.LastDailyEventResolution;
+
+		if (pending.HasValue)
+		{
+			var evt = pending.Value;
+			_labelDailyEventTitle!.Text = $"Daily Event: {ToDisplayName(evt.Type)}";
+			_labelDailyEventDescription!.Text = BuildEventDescription(evt);
+			_btnDailyEventOptionA!.Text = evt.OptionA.Label;
+			_btnDailyEventOptionB!.Text = evt.OptionB.Label;
+			_btnDailyEventOptionA.Disabled = false;
+			_btnDailyEventOptionB.Disabled = false;
+			_labelDailyEventResult!.Text = "";
+			return;
+		}
+
+		_labelDailyEventTitle!.Text = "Daily Event";
+		_labelDailyEventDescription!.Text = "Advance day to trigger an event.";
+		_btnDailyEventOptionA!.Text = "Option A";
+		_btnDailyEventOptionB!.Text = "Option B";
+		_btnDailyEventOptionA.Disabled = true;
+		_btnDailyEventOptionB.Disabled = true;
+
+		if (lastResolution.HasValue)
+		{
+			var result = lastResolution.Value;
+			var moneyText = result.MoneyDelta == 0
+				? "Money: 0"
+				: result.MoneyDelta > 0
+					? $"Money: +{result.MoneyDelta}"
+					: $"Money: {result.MoneyDelta}";
+			_labelDailyEventResult!.Text = $"Last result: {result.Summary} ({moneyText})";
+			return;
+		}
+
+		_labelDailyEventResult!.Text = "";
+	}
+
+	private string BuildEventDescription(DailyEventInstance evt)
+	{
+		var lines = new List<string>
+		{
+			evt.Description,
+			$"A: {evt.OptionA.Description}",
+			$"B: {evt.OptionB.Description}"
+		};
+
+		if (evt.TargetGladiatorId.HasValue)
+		{
+			var target = _state.Gladiators.FirstOrDefault(g => g.Id == evt.TargetGladiatorId.Value);
+			if (target.Id != Guid.Empty)
+			{
+				lines.Insert(1, $"Target: {target.Name}");
+			}
+		}
+
+		return string.Join("\n", lines);
+	}
+
+	private static string ToDisplayName(DailyEventType type) => type switch
+	{
+		DailyEventType.SponsorDeal => "Sponsor Deal",
+		DailyEventType.HarshDrill => "Harsh Drill",
+		DailyEventType.TavernRumor => "Tavern Rumor",
+		_ => "Unknown"
+	};
 
 	private void SyncSelectionWithAliveRoster()
 	{
