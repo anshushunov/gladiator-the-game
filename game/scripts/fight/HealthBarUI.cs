@@ -7,8 +7,8 @@ namespace Ludus.Game;
 /// </summary>
 public partial class HealthBarUI : Control
 {
-	private const float BarWidth = 120f;
-	private const float BarHeight = 12f;
+	private const float BarWidth = 160f;
+	private const float BarHeight = 16f;
 
 	private ColorRect? _bgRect;
 	private ColorRect? _fillRect;
@@ -43,7 +43,7 @@ public partial class HealthBarUI : Control
 			CustomMinimumSize = new Vector2(BarWidth + 4, 0)
 		};
 		_hpLabel.AddThemeColorOverride("font_color", Colors.White);
-		_hpLabel.AddThemeFontSizeOverride("font_size", 11);
+		_hpLabel.AddThemeFontSizeOverride("font_size", 14);
 		AddChild(_hpLabel);
 	}
 

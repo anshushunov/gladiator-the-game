@@ -15,8 +15,6 @@ public partial class FightScene : Node2D
 	[Signal]
 	public delegate void FightFinishedEventHandler();
 
-	private const string LeftPlaceholderPath = "res://assets/fight/fighter_placeholder_left.svg";
-	private const string RightPlaceholderPath = "res://assets/fight/fighter_placeholder_right.svg";
 	private const string ArenaBgPath = "res://assets/backgrounds/arena_bg_01.svg";
 	private const string HitSfxPath = "res://assets/sfx/fight.wav";
 
@@ -107,31 +105,31 @@ public partial class FightScene : Node2D
 		{
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
-			Position = new Vector2(460, 30),
-			CustomMinimumSize = new Vector2(200, 40),
+			Position = new Vector2(760, 30),
+			CustomMinimumSize = new Vector2(400, 50),
 			Modulate = Colors.White
 		};
-		_roundLabel.AddThemeFontSizeOverride("font_size", 28);
+		_roundLabel.AddThemeFontSizeOverride("font_size", 36);
 		_roundLabel.AddThemeColorOverride("font_color", Colors.White);
 		_roundLabel.AddThemeColorOverride("font_outline_color", Colors.Black);
-		_roundLabel.AddThemeConstantOverride("outline_size", 4);
+		_roundLabel.AddThemeConstantOverride("outline_size", 5);
 		uiLayer.AddChild(_roundLabel);
 
 		_eventLabel = new RichTextLabel
 		{
-			Position = new Vector2(200, 500),
-			Size = new Vector2(720, 80),
+			Position = new Vector2(560, 950),
+			Size = new Vector2(800, 100),
 			BbcodeEnabled = true,
 			ScrollFollowing = true
 		};
-		_eventLabel.AddThemeFontSizeOverride("normal_font_size", 16);
+		_eventLabel.AddThemeFontSizeOverride("normal_font_size", 18);
 		uiLayer.AddChild(_eventLabel);
 
-		// Control panel
+		// Control panel — centered below the arena
 		var controlPanel = new HBoxContainer
 		{
-			Position = new Vector2(360, 590),
-			CustomMinimumSize = new Vector2(400, 40)
+			Position = new Vector2(760, 1020),
+			CustomMinimumSize = new Vector2(400, 44)
 		};
 		controlPanel.AddThemeConstantOverride("separation", 16);
 		uiLayer.AddChild(controlPanel);
@@ -173,23 +171,21 @@ public partial class FightScene : Node2D
 
 	private void SetupFighters()
 	{
-		var leftTexture = TryLoad<Texture2D>(LeftPlaceholderPath);
-		var rightTexture = TryLoad<Texture2D>(RightPlaceholderPath);
-
+		// Arena ellipse center is at (960, 860) — position fighters on the arena floor
 		_leftFighter = new FighterVisual
 		{
-			Position = new Vector2(300, 340)
+			Position = new Vector2(620, 720)
 		};
 		_arenaFloor!.AddChild(_leftFighter);
-		_leftFighter.Initialize(_preFightLeft.Name, _preFightLeft.Health, _preFightLeft.MaxHealth, true, leftTexture);
+		_leftFighter.Initialize(_preFightLeft.Name, _preFightLeft.Health, _preFightLeft.MaxHealth, true);
 		_leftFighter.PlayIdle();
 
 		_rightFighter = new FighterVisual
 		{
-			Position = new Vector2(820, 340)
+			Position = new Vector2(1300, 720)
 		};
 		_arenaFloor.AddChild(_rightFighter);
-		_rightFighter.Initialize(_preFightRight.Name, _preFightRight.Health, _preFightRight.MaxHealth, false, rightTexture);
+		_rightFighter.Initialize(_preFightRight.Name, _preFightRight.Health, _preFightRight.MaxHealth, false);
 		_rightFighter.PlayIdle();
 	}
 

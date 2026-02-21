@@ -7,7 +7,7 @@ namespace Ludus.Game;
 /// </summary>
 public partial class DamagePopup : Label
 {
-	private const float FloatDistance = 60f;
+	private const float FloatDistance = 80f;
 	private const float Duration = 0.8f;
 
 	public static DamagePopup Create(Node parent, Vector2 position, int damage, bool isCrit)
@@ -21,7 +21,7 @@ public partial class DamagePopup : Label
 		};
 
 		popup.AddThemeColorOverride("font_color", isCrit ? new Color(1f, 0.2f, 0.1f) : Colors.White);
-		popup.AddThemeFontSizeOverride("font_size", isCrit ? 28 : 20);
+		popup.AddThemeFontSizeOverride("font_size", isCrit ? 36 : 24);
 		popup.AddThemeColorOverride("font_outline_color", Colors.Black);
 		popup.AddThemeConstantOverride("outline_size", 3);
 
@@ -41,7 +41,7 @@ public partial class DamagePopup : Label
 		};
 
 		popup.AddThemeColorOverride("font_color", new Color(0.7f, 0.7f, 0.7f));
-		popup.AddThemeFontSizeOverride("font_size", 18);
+		popup.AddThemeFontSizeOverride("font_size", 22);
 		popup.AddThemeColorOverride("font_outline_color", Colors.Black);
 		popup.AddThemeConstantOverride("outline_size", 2);
 
