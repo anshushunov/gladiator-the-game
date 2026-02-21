@@ -49,6 +49,12 @@ public partial class Main : CanvasLayer
 	private Button? _btnDailyEventOptionA;
 	private Button? _btnDailyEventOptionB;
 
+	private ItemList? _tournamentParticipantList;
+	private Button? _btnStartTournament;
+	private Label? _tournamentStatus;
+	private RichTextLabel? _tournamentResults;
+	private HashSet<Guid> _selectedTournamentParticipants = [];
+
 	private Guid? _selectedGladiatorId;
 	private Guid? _firstFighterId;
 	private Guid? _secondFighterId;
@@ -83,6 +89,11 @@ public partial class Main : CanvasLayer
 		_btnDailyEventOptionB = GetNode<Button>("Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/DailyEventButtons/btnDailyEventOptionB");
 		_labelDailyEventResult = GetNode<Label>("Control/MarginContainer/RootVBox/DailyEventPanel/DailyEventVBox/LabelDailyEventResult");
 
+		_tournamentParticipantList = GetNode<ItemList>("Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox/TournamentParticipantList");
+		_btnStartTournament = GetNode<Button>("Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox/btnStartTournament");
+		_tournamentStatus = GetNode<Label>("Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox/TournamentStatus");
+		_tournamentResults = GetNode<RichTextLabel>("Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox/TournamentResults");
+
 		_sfxHire = GetNode<AudioStreamPlayer>("SfxHire");
 		_sfxAdvanceDay = GetNode<AudioStreamPlayer>("SfxAdvanceDay");
 		_sfxFight = GetNode<AudioStreamPlayer>("SfxFight");
@@ -111,6 +122,8 @@ public partial class Main : CanvasLayer
 		_secondFighterSelect!.ItemSelected += OnSecondFighterSelected;
 		_btnDailyEventOptionA!.Pressed += OnDailyEventOptionAPressed;
 		_btnDailyEventOptionB!.Pressed += OnDailyEventOptionBPressed;
+		_btnStartTournament!.Pressed += OnStartTournamentPressed;
+		_tournamentParticipantList!.MultiSelected += OnTournamentParticipantMultiSelected;
 		_root!.Resized += OnRootResized;
 
 		UpdateLayoutByWidth();
@@ -123,6 +136,7 @@ public partial class Main : CanvasLayer
 		_selectedGladiatorId = null;
 		_firstFighterId = null;
 		_secondFighterId = null;
+		_selectedTournamentParticipants.Clear();
 		UpdateUI();
 	}
 
@@ -237,6 +251,84 @@ public partial class Main : CanvasLayer
 		UpdateUI();
 	}
 
+	private void OnTournamentParticipantMultiSelected(long index, bool selected)
+	{
+		if (index < 0 || index >= _aliveForSelection.Count)
+			return;
+
+		var id = _aliveForSelection[(int)index].Id;
+		if (selected)
+			_selectedTournamentParticipants.Add(id);
+		else
+			_selectedTournamentParticipants.Remove(id);
+
+		UpdateTournamentPanel();
+	}
+
+	public void OnStartTournamentPressed()
+	{
+		var ids = _selectedTournamentParticipants
+			.Where(id => _aliveForSelection.Any(g => g.Id == id))
+			.ToList();
+
+		if (ids.Count < 2)
+		{
+			_tournamentStatus!.Text = "Select at least 2 fighters.";
+			return;
+		}
+
+		var (updatedState, result) = _state.RunTournament(ids, 200);
+		_state = updatedState;
+		_selectedTournamentParticipants.Clear();
+
+		_tournamentResults!.Text = FormatTournamentResult(result);
+		_tournamentResults.ScrollToLine(0);
+		_tournamentStatus!.Text = $"Champion: {NameByIdFromAll(result.ChampionId) ?? "Unknown"} | Prize: {result.ChampionPrize}g";
+
+		TryPlay(_sfxFight);
+		UpdateUI();
+	}
+
+	private static string FormatTournamentResult(TournamentResult result)
+	{
+		var lines = new List<string>
+		{
+			$"=== Tournament ({result.ParticipantIds.Count} fighters) ===",
+			$"Prize Pool: {result.PrizePool}g"
+		};
+
+		foreach (var round in result.Rounds)
+		{
+			lines.Add($"\n--- Round {round.RoundNumber} ---");
+			foreach (var match in round.Matches)
+			{
+				if (match.Result == null)
+				{
+					// Bye
+					var fighter = match.Fighter1Id ?? match.Fighter2Id;
+					lines.Add($"  BYE -> advances");
+				}
+				else
+				{
+					var r = match.Result.Value;
+					lines.Add($"  {r.Winner.Name} vs {r.Loser.Name} -> {r.Winner.Name} wins (HP {r.Winner.Health}/{r.Winner.MaxHealth})");
+				}
+			}
+		}
+
+		lines.Add($"\nChampion Prize: {result.ChampionPrize}g");
+		if (result.RunnerUpId.HasValue)
+			lines.Add($"Runner-up Prize: {result.RunnerUpPrize}g");
+
+		return string.Join("\n", lines);
+	}
+
+	private string? NameByIdFromAll(Guid id)
+	{
+		var g = _state.Gladiators.FirstOrDefault(g => g.Id == id);
+		return g.Id == Guid.Empty ? null : g.Name;
+	}
+
 	private void OnGladiatorSelected(long index)
 	{
 		if (index < 0 || index >= _state.Gladiators.Count)
@@ -327,6 +419,7 @@ public partial class Main : CanvasLayer
 		UpdateTrainingPanel();
 		RebuildFightSelectors();
 		UpdateDailyEventPanel();
+		UpdateTournamentPanel();
 
 		var firstText = NameById(_firstFighterId) ?? "not selected";
 		var secondText = NameById(_secondFighterId) ?? "not selected";
@@ -338,6 +431,31 @@ public partial class Main : CanvasLayer
 		if (_aliveForSelection.Count < 2)
 		{
 			_fightStatus!.Text = "Need at least two alive gladiators.";
+		}
+	}
+
+	private void UpdateTournamentPanel()
+	{
+		// Синхронизируем выбранных участников с текущим ростером
+		_selectedTournamentParticipants.RemoveWhere(id => !_aliveForSelection.Any(g => g.Id == id));
+
+		_tournamentParticipantList!.Clear();
+		foreach (var g in _aliveForSelection)
+		{
+			var item = $"{g.Name} ({g.Health}/{g.MaxHealth} HP, STR:{g.Stats.Strength} AGI:{g.Stats.Agility} STA:{g.Stats.Stamina})";
+			_tournamentParticipantList.AddItem(item);
+
+			int idx = _tournamentParticipantList.ItemCount - 1;
+			if (_selectedTournamentParticipants.Contains(g.Id))
+				_tournamentParticipantList.Select(idx, false);
+		}
+
+		_btnStartTournament!.Disabled = _selectedTournamentParticipants.Count < 2;
+
+		// Показать последний результат турнира если нет текущего текста
+		if (_state.LastTournamentResult.HasValue && string.IsNullOrEmpty(_tournamentResults!.Text.Replace("Tournament results appear here...", "").Trim()))
+		{
+			_tournamentResults!.Text = FormatTournamentResult(_state.LastTournamentResult.Value);
 		}
 	}
 

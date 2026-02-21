@@ -381,6 +381,44 @@ autowrap_mode = 2
 scroll_active = true
 text = "Fight log appears here..."
 
+[node name="TournamentPanel" type="PanelContainer" parent="Control/MarginContainer/RootVBox/MainGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TournamentVBox" type="VBoxContainer" parent="Control/MarginContainer/RootVBox/MainGrid/TournamentPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LabelTournamentTitle" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.83, 0.62, 1)
+theme_override_font_sizes/font_size = 22
+text = "Tournament"
+
+[node name="TournamentParticipantList" type="ItemList" parent="Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(420, 180)
+select_mode = 1
+
+[node name="btnStartTournament" type="Button" parent="Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox"]
+layout_mode = 2
+text = "Start Tournament"
+
+[node name="TournamentStatus" type="Label" parent="Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.96, 0.79, 1)
+text = ""
+
+[node name="TournamentResults" type="RichTextLabel" parent="Control/MarginContainer/RootVBox/MainGrid/TournamentPanel/TournamentVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(420, 200)
+autowrap_mode = 2
+scroll_active = true
+text = "Tournament results appear here..."
+
 [node name="SfxHire" type="AudioStreamPlayer" parent="."]
 volume_db = -8.0
 

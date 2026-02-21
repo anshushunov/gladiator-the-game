@@ -46,6 +46,11 @@ public partial record LudusState
     public DailyEventResolution? LastDailyEventResolution { get; init; }
 
     /// <summary>
+    /// Результат последнего проведённого турнира.
+    /// </summary>
+    public TournamentResult? LastTournamentResult { get; init; }
+
+    /// <summary>
     /// Константа для значения seed по умолчанию.
     /// </summary>
     public const int DefaultSeed = 42;
@@ -388,6 +393,49 @@ public partial record LudusState
         {
             Gladiators = updatedGladiators,
             Seed = newSeed
+        };
+
+        return (updatedState, result);
+    }
+
+    /// <summary>
+    /// Проводит турнир с дефолтной моделью.
+    /// </summary>
+    public (LudusState State, TournamentResult Result) RunTournament(
+        IReadOnlyList<Guid> participantIds, int prizePool)
+    {
+        return RunTournament(participantIds, prizePool, TournamentModel.Default);
+    }
+
+    /// <summary>
+    /// Проводит турнир с указанной моделью.
+    /// Все участники должны существовать и быть боеспособными.
+    /// Призы (Champion + RunnerUp) добавляются к Money.
+    /// </summary>
+    public (LudusState State, TournamentResult Result) RunTournament(
+        IReadOnlyList<Guid> participantIds, int prizePool, TournamentModel model)
+    {
+        // Валидация участников
+        foreach (var id in participantIds)
+        {
+            var g = GetGladiator(id);
+            if (!g.CanFight)
+                throw new ValidationException($"Участник {g.Name} не может сражаться");
+        }
+
+        var rng = CreateRng();
+        var (updatedGladiators, result) = TournamentEngine.RunTournament(
+            Gladiators, participantIds, prizePool, rng, model);
+
+        int newSeed = rng.Next(int.MaxValue);
+        int totalPrize = result.ChampionPrize + result.RunnerUpPrize;
+
+        var updatedState = this with
+        {
+            Gladiators = updatedGladiators,
+            Money = Money + totalPrize,
+            Seed = newSeed,
+            LastTournamentResult = result
         };
 
         return (updatedState, result);
