@@ -1,93 +1,57 @@
 namespace Ludus.Core;
 
 /// <summary>
-/// Гладиатор — сущность, участвующая в симуляции боя.
-/// Имеет уникальный идентификатор, имя и статистику.
+/// Gladiator domain entity.
 /// </summary>
 public readonly struct Gladiator
 {
-    /// <summary>
-    /// Уникальный идентификатор гладиатора.
-    /// </summary>
     public Guid Id { get; }
-
-    /// <summary>
-    /// Имя гладиатора.
-    /// </summary>
     public string Name { get; }
-
-    /// <summary>
-    /// Статистика гладиатора.
-    /// </summary>
     public Stats Stats { get; }
-
-    /// <summary>
-    /// Текущее здоровье гладиатора (не входит в Stats — меняется в бою).
-    /// </summary>
     public int Health { get; }
-
-    /// <summary>
-    /// Максимальное здоровье гладиатора (вычисляется на основе Stats).
-    /// </summary>
     public int MaxHealth { get; }
-
-    /// <summary>
-    /// Текущая назначенная тренировка (null = нет тренировки).
-    /// </summary>
     public TrainingType? CurrentTraining { get; }
-
-    /// <summary>
-    /// Текущая травма (null = здоров).
-    /// </summary>
     public Injury? CurrentInjury { get; }
-
-    /// <summary>
-    /// Мораль гладиатора [0..100].
-    /// </summary>
     public int Morale { get; }
-
-    /// <summary>
-    /// Усталость гладиатора [0..100].
-    /// </summary>
     public int Fatigue { get; }
+    public ContractState Contract { get; }
 
-    /// <summary>
-    /// Жив ли гладиатор.
-    /// </summary>
     public bool IsAlive => Health > 0;
-
-    /// <summary>
-    /// Есть ли травма.
-    /// </summary>
     public bool IsInjured => CurrentInjury.HasValue;
-
-    /// <summary>
-    /// Может ли участвовать в бою (жив и не травмирован).
-    /// </summary>
     public bool CanFight => IsAlive && !IsInjured;
 
     private const int MinNameLength = 1;
     private const int MaxNameLength = 50;
 
-    public Gladiator(Guid id, string name, Stats stats, int health, int maxHealth,
-        TrainingType? currentTraining = null, Injury? currentInjury = null,
-        int morale = ConditionModel.DefaultMorale, int fatigue = ConditionModel.DefaultFatigue)
+    public Gladiator(
+        Guid id,
+        string name,
+        Stats stats,
+        int health,
+        int maxHealth,
+        TrainingType? currentTraining = null,
+        Injury? currentInjury = null,
+        int morale = ConditionModel.DefaultMorale,
+        int fatigue = ConditionModel.DefaultFatigue,
+        ContractState? contract = null)
     {
         if (string.IsNullOrWhiteSpace(name) || name.Length < MinNameLength || name.Length > MaxNameLength)
             throw new ValidationException(
-                $"Имя должно быть непустой строкой длиной от {MinNameLength} до {MaxNameLength} символов");
+                $"Name must be non-empty and between {MinNameLength} and {MaxNameLength} characters");
 
         if (health < 0 || health > maxHealth)
-            throw new ValidationException(
-                $"Здоровье должно быть в диапазоне [0, {maxHealth}]");
+            throw new ValidationException($"Health must be in range [0, {maxHealth}]");
 
         if (morale < ConditionModel.MinMorale || morale > ConditionModel.MaxMorale)
             throw new ValidationException(
-                $"Мораль должна быть в диапазоне [{ConditionModel.MinMorale}, {ConditionModel.MaxMorale}]");
+                $"Morale must be in range [{ConditionModel.MinMorale}, {ConditionModel.MaxMorale}]");
 
         if (fatigue < ConditionModel.MinFatigue || fatigue > ConditionModel.MaxFatigue)
             throw new ValidationException(
-                $"Усталость должна быть в диапазоне [{ConditionModel.MinFatigue}, {ConditionModel.MaxFatigue}]");
+                $"Fatigue must be in range [{ConditionModel.MinFatigue}, {ConditionModel.MaxFatigue}]");
+
+        var contractValue = contract ?? ContractState.Default;
+        contractValue.Validate();
 
         Id = id;
         Name = name.Trim();
@@ -98,102 +62,74 @@ public readonly struct Gladiator
         CurrentInjury = currentInjury;
         Morale = morale;
         Fatigue = fatigue;
+        Contract = contractValue;
     }
 
-    /// <summary>
-    /// Создаёт нового гладиатора без проверок (для тестов).
-    /// </summary>
     public static Gladiator Create(string name, Stats stats)
     {
-        // Максимальное здоровье = Stamina * 10 (базовое правило)
         int maxHealth = stats.Stamina * 10;
         int startingHealth = maxHealth;
-
         return new Gladiator(Guid.NewGuid(), name, stats, startingHealth, maxHealth);
     }
 
-    /// <summary>
-    /// Применяет урон гладиатору. Возвращает новый экземпляр с обновлённым здоровьем.
-    /// </summary>
     public Gladiator TakeDamage(int damage)
     {
         if (damage < 0)
-            throw new ArgumentException("Урон не может быть отрицательным", nameof(damage));
+            throw new ArgumentException("Damage cannot be negative", nameof(damage));
         if (!IsAlive)
-            throw new InvalidOperationException("Мёртвый гладиатор не может получать урон");
+            throw new InvalidOperationException("Dead gladiator cannot take damage");
 
         int newHealth = Math.Max(0, Health - damage);
-        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining, CurrentInjury, Morale, Fatigue);
+        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining, CurrentInjury, Morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Восстанавливает здоровье гладиатора. Возвращает новый экземпляр.
-    /// </summary>
     public Gladiator RestoreHealth(int amount)
     {
         if (amount < 0)
-            throw new ArgumentException("Восстановление не может быть отрицательным", nameof(amount));
+            throw new ArgumentException("Heal amount cannot be negative", nameof(amount));
         if (!IsAlive)
-            throw new InvalidOperationException("Мёртвый гладиатор не может восстанавливать здоровье");
+            throw new InvalidOperationException("Dead gladiator cannot be healed");
 
         int newHealth = Math.Min(MaxHealth, Health + amount);
-        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining, CurrentInjury, Morale, Fatigue);
+        return new Gladiator(Id, Name, Stats, newHealth, MaxHealth, CurrentTraining, CurrentInjury, Morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Назначает тренировку гладиатору. Гладиатор должен быть жив, не травмирован, стат не на максимуме.
-    /// </summary>
     public Gladiator AssignTraining(TrainingType type)
     {
         if (!IsAlive)
-            throw new InvalidOperationException("Мёртвый гладиатор не может тренироваться");
-
+            throw new InvalidOperationException("Dead gladiator cannot train");
         if (IsInjured)
-            throw new InvalidOperationException("Травмированный гладиатор не может тренироваться");
+            throw new InvalidOperationException("Injured gladiator cannot train");
 
         int currentStatValue = GetStatValue(type);
         if (currentStatValue >= 10)
-            throw new InvalidOperationException(
-                $"Стат {type} уже на максимуме (10), тренировка невозможна");
+            throw new InvalidOperationException($"Stat {type} is already maxed (10)");
 
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, type, CurrentInjury, Morale, Fatigue);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, type, CurrentInjury, Morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Снимает текущую тренировку.
-    /// </summary>
     public Gladiator ClearTraining()
     {
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, null, CurrentInjury, Morale, Fatigue);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, null, CurrentInjury, Morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Применяет травму гладиатору. Гладиатор должен быть жив.
-    /// </summary>
     public Gladiator ApplyInjury(Injury injury)
     {
         if (!IsAlive)
-            throw new InvalidOperationException("Мёртвый гладиатор не может получить травму");
+            throw new InvalidOperationException("Dead gladiator cannot be injured");
 
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, injury, Morale, Fatigue);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, injury, Morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Уменьшает оставшиеся дни восстановления. Снимает травму если дни закончились.
-    /// </summary>
     public Gladiator TickRecovery()
     {
         if (!CurrentInjury.HasValue)
             return this;
 
         var tickedInjury = CurrentInjury.Value.Tick();
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, tickedInjury, Morale, Fatigue);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, tickedInjury, Morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Применяет прирост стата от тренировки. Если стат достигает 10 — тренировка автоматически снимается.
-    /// При росте Stamina: MaxHealth и Health увеличиваются на 10.
-    /// </summary>
     public Gladiator ApplyStatGain(TrainingType type)
     {
         var newStats = type switch
@@ -222,26 +158,45 @@ public readonly struct Gladiator
         };
 
         TrainingType? newTraining = newStatValue >= 10 ? null : CurrentTraining;
-
-        return new Gladiator(Id, Name, newStats, newHealth, newMaxHealth, newTraining, CurrentInjury, Morale, Fatigue);
+        return new Gladiator(Id, Name, newStats, newHealth, newMaxHealth, newTraining, CurrentInjury, Morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Возвращает нового гладиатора с указанной моралью (clamped to [0, 100]).
-    /// </summary>
     public Gladiator WithMorale(int morale)
     {
         morale = Math.Clamp(morale, ConditionModel.MinMorale, ConditionModel.MaxMorale);
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, CurrentInjury, morale, Fatigue);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, CurrentInjury, morale, Fatigue, Contract);
     }
 
-    /// <summary>
-    /// Возвращает нового гладиатора с указанной усталостью (clamped to [0, 100]).
-    /// </summary>
     public Gladiator WithFatigue(int fatigue)
     {
         fatigue = Math.Clamp(fatigue, ConditionModel.MinFatigue, ConditionModel.MaxFatigue);
-        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, CurrentInjury, Morale, fatigue);
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, CurrentInjury, Morale, fatigue, Contract);
+    }
+
+    public Gladiator WithContract(ContractState contract)
+    {
+        contract.Validate();
+        return new Gladiator(Id, Name, Stats, Health, MaxHealth, CurrentTraining, CurrentInjury, Morale, Fatigue, contract);
+    }
+
+    public Gladiator TickContractDay()
+    {
+        return WithContract(Contract.TickDay());
+    }
+
+    public Gladiator RenewContractIfNeeded()
+    {
+        return WithContract(Contract.RenewIfNeeded());
+    }
+
+    public Gladiator MarkContractOverdue()
+    {
+        return WithContract(Contract.MarkOverdueDay());
+    }
+
+    public Gladiator ClearContractOverdue()
+    {
+        return WithContract(Contract.ClearOverdueIfPaid());
     }
 
     private int GetStatValue(TrainingType type) => type switch
@@ -256,7 +211,8 @@ public readonly struct Gladiator
     {
         string training = CurrentTraining.HasValue ? $", Training={CurrentTraining.Value}" : "";
         string injury = CurrentInjury.HasValue ? $", Injury={CurrentInjury.Value.Type}({CurrentInjury.Value.RecoveryDaysLeft}d)" : "";
-        return $"Gladiator {{ Id={Id}, Name={Name}, Health={Health}/{MaxHealth}, Stats={Stats}, Morale={Morale}, Fatigue={Fatigue}{training}{injury} }}";
+        string contract = $", Wage={Contract.Terms.DailyWage}/d, Contract={Contract.DaysRemaining}d, Overdue={Contract.OverdueDays}";
+        return $"Gladiator {{ Id={Id}, Name={Name}, Health={Health}/{MaxHealth}, Stats={Stats}, Morale={Morale}, Fatigue={Fatigue}{training}{injury}{contract} }}";
     }
 
     public override bool Equals(object? obj)
@@ -270,7 +226,8 @@ public readonly struct Gladiator
                CurrentTraining == other.CurrentTraining &&
                CurrentInjury == other.CurrentInjury &&
                Morale == other.Morale &&
-               Fatigue == other.Fatigue;
+               Fatigue == other.Fatigue &&
+               Contract == other.Contract;
     }
 
     public override int GetHashCode()
@@ -285,6 +242,7 @@ public readonly struct Gladiator
         hash.Add(CurrentInjury);
         hash.Add(Morale);
         hash.Add(Fatigue);
+        hash.Add(Contract);
         return hash.ToHashCode();
     }
 }

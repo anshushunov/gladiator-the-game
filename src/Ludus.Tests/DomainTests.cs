@@ -604,21 +604,21 @@ public class EconomyTests
     }
 
     [Fact]
-    public void AdvanceDay_ShouldIncrementDayAndDeductUpkeep()
+    public void AdvanceDay_ShouldIncrementDayAndDeductDailyWages()
     {
         // arrange
         var state = LudusState.NewGame(42);
         state = state.HireRandomGladiator();
         int initialDay = state.Day;
         int initialMoney = state.Money;
-        int upkeep = LudusState.DailyUpkeepPerGladiator * state.Count;
+        int dailyWages = state.Gladiators.Where(g => g.IsAlive).Sum(g => g.Contract.Terms.DailyWage);
 
         // act
         var newState = state.AdvanceDay();
 
         // assert
         Assert.Equal(initialDay + 1, newState.Day);
-        Assert.Equal(initialMoney - upkeep, newState.Money);
+        Assert.Equal(initialMoney - dailyWages, newState.Money);
     }
 
     [Fact]
@@ -644,14 +644,14 @@ public class EconomyTests
         var state = LudusState.NewGame(42);
         state = state.HireRandomGladiator();
         state = state.HireRandomGladiator();
-        int upkeep = LudusState.DailyUpkeepPerGladiator * state.Count;
+        int dailyWages = state.Gladiators.Where(g => g.IsAlive).Sum(g => g.Contract.Terms.DailyWage);
 
         // act
         var newState = state.AdvanceDay();
 
         // assert
         Assert.Equal(state.Day + 1, newState.Day);
-        Assert.Equal(state.Money - upkeep, newState.Money);
+        Assert.Equal(state.Money - dailyWages, newState.Money);
     }
 
     [Fact]

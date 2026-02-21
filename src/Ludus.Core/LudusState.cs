@@ -53,7 +53,6 @@ public partial record LudusState
     /// <summary>
     /// Ежедневное содержание одного гладиатора.
     /// </summary>
-    public const int DailyUpkeepPerGladiator = 5;
 
     private const int MinGladiators = 0;
     private const int MaxGladiators = 100;
@@ -214,9 +213,8 @@ public partial record LudusState
         trainingModel.Validate();
         conditionModel.Validate();
 
-        // Списываем содержание: DailyUpkeepPerGladiator * Gladiators.Count
-        int upkeep = DailyUpkeepPerGladiator * Gladiators.Count;
-        int newMoney = Money - upkeep;
+        // Apply daily wages from active contracts.
+        int newMoney = Money;
 
         var rng = CreateRng();
         var updatedGladiators = Gladiators.Select(g =>
@@ -249,11 +247,47 @@ public partial record LudusState
                 }
             }
 
+            g = g.TickContractDay();
+            g = g.RenewContractIfNeeded();
+
             return g;
         }).ToArray();
 
+        int totalDailyWages = updatedGladiators
+            .Where(g => g.IsAlive)
+            .Sum(g => g.Contract.Terms.DailyWage);
+        newMoney -= totalDailyWages;
+        bool hasOverdue = newMoney < 0;
+
+        updatedGladiators = updatedGladiators
+            .Select(g =>
+            {
+                if (!g.IsAlive)
+                    return g;
+
+                return hasOverdue ? g.MarkContractOverdue() : g.ClearContractOverdue();
+            })
+            .ToArray();
+
+        var retainedGladiators = updatedGladiators
+            .Where(g => !(g.IsAlive && g.Contract.IsOverdueLimitReached))
+            .ToArray();
+
+        Guid? newActiveId = ActiveGladiatorId;
+        if (newActiveId.HasValue && !retainedGladiators.Any(g => g.Id == newActiveId.Value))
+        {
+            newActiveId = null;
+        }
+
         int newSeed = rng.Next(int.MaxValue);
-        return this with { Day = Day + 1, Money = newMoney, Gladiators = updatedGladiators, Seed = newSeed };
+        return this with
+        {
+            Day = Day + 1,
+            Money = newMoney,
+            Gladiators = retainedGladiators,
+            ActiveGladiatorId = newActiveId,
+            Seed = newSeed
+        };
     }
 
     /// <summary>

@@ -293,7 +293,7 @@ public partial class Main : CanvasLayer
 						: g.CurrentTraining.HasValue
 							? $"TRN:{TrainingAbbrev(g.CurrentTraining.Value)}"
 							: "FIT";
-				var row = $"{g.Name} [{stateText}]  HP {g.Health}/{g.MaxHealth}  STR {g.Stats.Strength}  AGI {g.Stats.Agility}  STA {g.Stats.Stamina}  MOR:{g.Morale} FAT:{g.Fatigue}";
+				var row = $"{g.Name} [{stateText}]  HP {g.Health}/{g.MaxHealth}  STR {g.Stats.Strength}  AGI {g.Stats.Agility}  STA {g.Stats.Stamina}  MOR:{g.Morale} FAT:{g.Fatigue}  W:{g.Contract.Terms.DailyWage}/d  CNT:{g.Contract.DaysRemaining}d  OVD:{g.Contract.OverdueDays}";
 				_listGladiators.AddItem(row, _portraitTexture);
 			}
 		}
@@ -346,7 +346,7 @@ public partial class Main : CanvasLayer
 
 		foreach (var g in _aliveForSelection)
 		{
-			var item = $"{g.Name} ({g.Health}/{g.MaxHealth} HP, MOR:{g.Morale} FAT:{g.Fatigue})";
+			var item = $"{g.Name} ({g.Health}/{g.MaxHealth} HP, MOR:{g.Morale} FAT:{g.Fatigue}, W:{g.Contract.Terms.DailyWage}/d, CNT:{g.Contract.DaysRemaining}d, OVD:{g.Contract.OverdueDays})";
 			_firstFighterSelect.AddItem(item);
 			_secondFighterSelect.AddItem(item);
 		}
@@ -414,7 +414,7 @@ public partial class Main : CanvasLayer
 			return;
 		}
 
-		_labelSelectedGladiator!.Text = $"{gladiator.Name}  STR {gladiator.Stats.Strength}  AGI {gladiator.Stats.Agility}  STA {gladiator.Stats.Stamina}  MOR:{gladiator.Morale} FAT:{gladiator.Fatigue}";
+		_labelSelectedGladiator!.Text = $"{gladiator.Name}  STR {gladiator.Stats.Strength}  AGI {gladiator.Stats.Agility}  STA {gladiator.Stats.Stamina}  MOR:{gladiator.Morale} FAT:{gladiator.Fatigue}  W:{gladiator.Contract.Terms.DailyWage}/d  CNT:{gladiator.Contract.DaysRemaining}d  OVD:{gladiator.Contract.OverdueDays}";
 
 		if (gladiator.IsInjured)
 		{

@@ -48,7 +48,7 @@
 
 ---
 
-### [ ] Issue-F: Contracts & Wages v1
+### [x] Issue-F: Contracts & Wages v1
 - Goal:
   - ввести контракты и регулярные выплаты/риски ухода.
 - Changes:
